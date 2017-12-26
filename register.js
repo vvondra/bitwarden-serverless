@@ -1,11 +1,10 @@
 import * as AWS  from 'aws-sdk';
 import * as utils from './lib/api_utils';
-import { findUserByEmail } from './lib/users';
-import uuidv4 from 'uuid/v4';
+import { findUserByEmail, createUser } from './lib/users';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-export const handler = (event, context, callback) => {
+export const handler = async (event, context, callback) => {
   console.log('Received event:', JSON.stringify(event, null, 2));
   if (!event.body) {
     callback(null, utils.validationError("Bad request"));
@@ -29,44 +28,21 @@ export const handler = (event, context, callback) => {
     return;
   }
 
-  findUserByEmail(body.email).then((user) => {
-    if (user) {
-      callback(null, utils.validationError("E-mail already taken"));
-      return;
-    }
+  const existingUser = await findUserByEmail(body.email);
 
-    const params = {
-      TableName: tableName,
-      Item: buildUser(body)
-    };
-  
-    docClient.put(params, (err, data) => {
-      if (err)  {
-        console.error("Error writing user", { err });
-        callback(err);
-        return;
-      }
-  
-      console.info("New user created", { data });
+  if (existingUser) {
+    callback(null, utils.validationError("E-mail already taken"));
+    return;
+  }
 
-      callback(null, {
-        statusCode: 200,
-        body: ""
-      });
+  try {
+    const user = await createUser(body);
+
+    callback(null, {
+      statusCode: 200,
+      body: ""
     });
-  }).catch((err) => {
-    callback(err);
-  });
+  } catch (e) {
+    callback(null, utils.serverError(e));
+  }
 }; 
-
-function buildUser(body) {
-  return {
-    uuid: uuidv4(),
-    email: body.email.toLowerCase(),
-    password_hash: body.masterPasswordHash,
-    password_hint: body.masterPasswordHint,
-    key: body.key,
-    culture: 'en-US', // Hard-coded unless supplied from elsewhere
-    premium: true,
-  };
-};
