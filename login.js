@@ -1,5 +1,5 @@
 import * as utils from './lib/api_utils';
-import { findDeviceByRefreshToken } from './lib/devices';
+import { findDeviceByRefreshToken, findDeviceByUUID, deleteDevice } from './lib/devices';
 import { findUserByEmail } from './lib/users';
 
 export const handler = async (event, context, callback) => {
@@ -51,6 +51,13 @@ export const handler = async (event, context, callback) => {
         if (!user.matchesPasswordHash(body.password)) {
           callback(null, utils.validationError("Invalid password"));
           return;
+        }
+
+        var device = await findDeviceByUUID(body.deviceIdentifier);
+
+        if (device && device.user_uuid != user.uuid) {
+          deleteDevice(body.deviceIdentifier);
+          device = null
         }
 
         break;
