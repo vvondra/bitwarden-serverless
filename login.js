@@ -1,10 +1,8 @@
-import * as AWS  from 'aws-sdk';
 import * as utils from './lib/api_utils';
+import { findDeviceByRefreshToken } from './lib/devices';
+import { findUserByEmail } from './lib/users';
 
-const docClient = new AWS.DynamoDB.DocumentClient();
-const deviceTableName = process.env.DEVICES_TABLE;
-
-export const handler = (event, context, callback) => {
+export const handler = async (event, context, callback) => {
   console.log('Received event:', JSON.stringify(event, null, 2));
   if (!event.body) {
     callback(null, utils.validationError("Bad request"));
@@ -15,41 +13,65 @@ export const handler = (event, context, callback) => {
 
   var device;
 
-  switch (body.grant_type) {
-    case 'password':
+  try {
+    switch (body.grant_type) {
+      case 'password':
+        const ok = [
+          'client_id',
+          'grant_type',
+          'deviceidentifier',
+          'devicename',
+          'devicetype',
+          'password',
+          'scope',
+          'username'
+        ].some((param) => {
+          if (!body[param]) {
+            callback(null, utils.validationError(param + " must be supplied"));
+            return true;
+          }
+        });
 
-      break;
-    case 'refresh_token':
-      if (!body.refresh_token) {
-        callback(null, utils.validationError("Refresh token must be supplied"));
+        if (!ok) {
+          return;
+        }
+
+        if (body.scope != 'api offline_access') {
+          callback(null, utils.validationError("Scope not supported"));
+          return;
+        }
+
+        const user = await findUserByEmail(body.username);
+
+        if (!user) {
+          callback(null, utils.validationError("Invalid e-mail/username"));
+          return;
+        }
+
+        if (!user.matchesPasswordHash(body.password)) {
+          callback(null, utils.validationError("Invalid password"));
+          return;
+        }
+
+        break;
+      case 'refresh_token':
+        if (!body.refresh_token) {
+          callback(null, utils.validationError("Refresh token must be supplied"));
+          return;
+        }
+  
+        device = await findDeviceByRefreshToken(body.refresh_token);
+        break;
+      default:
+        callback(null, utils.validationError("Unsupported grant type"));
         return;
-      }
+    }
+  } catch (e) {
 
-      device = findDeviceByRefreshToken(body.refresh_token);
-      break;
-    default:
-      callback(null, utils.validationError("Unsupported grant type"));
-      return;
   }
 }; 
 
-function findDeviceByRefreshToken(refreshToken) {
-  const params = {
-    TableName: deviceTableName,
-    FilterExpression: 'refresh_token = :refresh_token',
-    ExpressionAttributeValues: {':refresh_token': refreshToken}
-  };
-  
-  return new Promise((resolve, reject) => {
-    docClient.scan(params, (err, data) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(data.Items);
-    });
-  })
-}
+
 
 function buildUser(body) {
   return {

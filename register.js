@@ -1,9 +1,9 @@
 import * as AWS  from 'aws-sdk';
 import * as utils from './lib/api_utils';
+import { findUserByEmail } from './lib/users';
 import uuidv4 from 'uuid/v4';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
-const tableName = process.env.USERS_TABLE;
 
 export const handler = (event, context, callback) => {
   console.log('Received event:', JSON.stringify(event, null, 2));
@@ -29,8 +29,8 @@ export const handler = (event, context, callback) => {
     return;
   }
 
-  findUserByEmail(body.email).then((items) => {
-    if (items.length > 0) {
+  findUserByEmail(body.email).then((user) => {
+    if (user) {
       callback(null, utils.validationError("E-mail already taken"));
       return;
     }
@@ -58,24 +58,6 @@ export const handler = (event, context, callback) => {
     callback(err);
   });
 }; 
-
-function findUserByEmail(email) {
-  const params = {
-    TableName: tableName,
-    FilterExpression: 'email = :email',
-    ExpressionAttributeValues: {':email': email}
-  };
-  
-  return new Promise((resolve, reject) => {
-    docClient.scan(params, (err, data) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(data.Items);
-    });
-  })
-}
 
 function buildUser(body) {
   return {

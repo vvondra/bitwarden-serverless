@@ -53,6 +53,15 @@ describe("Registration API", function () {
       );
     }).then(function (response) {
       expect(response).to.have.status(400);
+      // E-mails are unique case-insensitive
+      body.email = body.email.toUpperCase();
+
+      return chakram.post(
+        process.env.API_URL + "/api/accounts/register",
+        body
+      );
+    }).then(function (response) {
+      expect(response).to.have.status(400);
     });
     
   });
