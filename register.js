@@ -1,5 +1,8 @@
+import * as AWS from 'aws-sdk';
 import * as utils from './lib/api_utils';
 import { findUserByEmail, createUser } from './lib/users';
+
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event, context, callback) => {
   console.log('Received event:', JSON.stringify(event, null, 2));
