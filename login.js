@@ -19,9 +19,9 @@ export const handler = async (event, context, callback) => {
         const ok = [
           'client_id',
           'grant_type',
-          'deviceidentifier',
-          'devicename',
-          'devicetype',
+          'deviceIdentifier',
+          'deviceName',
+          'deviceType',
           'password',
           'scope',
           'username'
