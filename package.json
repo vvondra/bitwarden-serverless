@@ -12,6 +12,7 @@
     "babel-polyfill": "^6.23.0",
     "babel-preset-env": "^1.6.0",
     "chakram": "^1.5.0",
+    "lodash": "^4.17.4",
     "mocha": "^4.0.1",
     "serverless-webpack": "^3.1.1",
     "webpack": "^3.3.0"
@@ -19,6 +20,7 @@
   "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.175.0"
+    "aws-sdk": "^2.175.0",
+    "uuid": "^3.1.0"
   }
 }

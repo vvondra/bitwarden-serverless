@@ -1,5 +1,6 @@
 import * as AWS  from 'aws-sdk';
 import * as utils from './lib/api_utils';
+import uuidv4 from 'uuid/v4';
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.USERS_TABLE;
@@ -78,9 +79,10 @@ function findUserByEmail(email) {
 
 function buildUser(body) {
   return {
+    uuid: uuidv4(),
     email: body.email.toLowerCase(),
-    password_hash: body.masterpasswordhash,
-    password_hint: body.masterpasswordhint,
+    password_hash: body.masterPasswordHash,
+    password_hint: body.masterPasswordHint,
     key: body.key,
     culture: 'en-US', // Hard-coded unless supplied from elsewhere
     premium: true,
