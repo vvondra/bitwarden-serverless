@@ -17,7 +17,7 @@ describe("Registration API", function () {
     return expect(response).to.have.status(400);
   });
 
-  ['email', 'masterPasswordHash', 'key'].forEach(function(param) {
+  ['email', 'masterPasswordHash', 'key'].forEach(function (param) {
     it("should check for " + param + " in body", function () {
       var body = _.omit(defaultBody, param);
       var response = chakram.post(
@@ -27,7 +27,7 @@ describe("Registration API", function () {
       return expect(response).to.have.status(400);
     });
   });
-  
+
   it("should check for valid email", function () {
     var body = _.clone(defaultBody);
     body.email = 'bademail';
@@ -63,6 +63,6 @@ describe("Registration API", function () {
     }).then(function (response) {
       expect(response).to.have.status(400);
     });
-    
+
   });
 });

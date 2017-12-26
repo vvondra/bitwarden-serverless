@@ -59,7 +59,7 @@ export const handler = async (event, context, callback) => {
           callback(null, utils.validationError("Refresh token must be supplied"));
           return;
         }
-  
+
         device = await findDeviceByRefreshToken(body.refresh_token);
         break;
       default:
@@ -69,9 +69,7 @@ export const handler = async (event, context, callback) => {
   } catch (e) {
 
   }
-}; 
-
-
+};
 
 function buildUser(body) {
   return {

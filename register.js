@@ -1,4 +1,4 @@
-import * as AWS  from 'aws-sdk';
+import * as AWS from 'aws-sdk';
 import * as utils from './lib/api_utils';
 import { findUserByEmail, createUser } from './lib/users';
 
