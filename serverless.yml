@@ -30,7 +30,7 @@ functions:
     events:
       - http:
           method: post
-          path: api/connect/token
+          path: identity/connect/token
   register:
     handler: register.handler
     events:

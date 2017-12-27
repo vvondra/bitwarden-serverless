@@ -1,6 +1,6 @@
 import * as utils from './lib/api_utils';
 import { User, Device } from './lib/models';
-import { regenerateTokens, DEFAULT_VALIDITY } from './lib/bitwarden';
+import { regenerateTokens, hashesMatch, DEFAULT_VALIDITY } from './lib/bitwarden';
 
 export const handler = async (event, context, callback) => {
   console.log('Login handler triggered', JSON.stringify(event, null, 2));
@@ -31,6 +31,7 @@ export const handler = async (event, context, callback) => {
             callback(null, utils.validationError(param + ' must be supplied'));
             return true;
           }
+
           return false;
         })) {
           return;
@@ -41,9 +42,9 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        user = await User.scan()
-          .where('email').equals(body.email.toLowerCase())
-          .execAsync()
+        user = (await User.scan()
+          .where('email').equals(body.username.toLowerCase())
+          .execAsync())
           .Items[0];
 
         if (!user) {
@@ -51,7 +52,7 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        if (!user.matchesPasswordHash(body.password)) {
+        if (!hashesMatch(user.get('passwordHash'), body.password)) {
           callback(null, utils.validationError('Invalid password'));
           return;
         }
@@ -73,8 +74,11 @@ export const handler = async (event, context, callback) => {
         device.set({
           type: body.deviceType,
           name: body.deviceName,
-          pushToken: body.devicePushToken,
         });
+
+        if (body.devicePushToken) {
+          device.set({ pushToken: body.devicePushToken });
+        }
 
         break;
       case 'refresh_token':
@@ -83,12 +87,15 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
+        console.log('Login attempt using refresh token', { refresh_token: body.refresh_token });
+
         device = await Device.scan()
           .where('refresh_token').equals(body.refresh_token)
           .execAsync()
           .Items[0];
 
         if (!device) {
+          console.error('Invalid refresh token', { refresh_token: body.refresh_token });
           callback(null, utils.validationError('Invalid refresh token'));
           return;
         }
@@ -115,6 +122,7 @@ export const handler = async (event, context, callback) => {
       }),
     });
   } catch (e) {
+    console.error("Internal error during login", e);
     callback(null, utils.serverError('Internal error'));
   }
 };

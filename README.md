@@ -8,7 +8,7 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
   - should run completely within AWS Free Tier limits
   - automatic multi-zone availability
 
-## Setup
+## Setup
 
 If you have AWS credentials set up, this should get you a running instance of the API. Just plug the AWS Gateway Service endpoint into your Bitwarden settings.
 
