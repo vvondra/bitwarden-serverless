@@ -3,7 +3,7 @@ import { findDeviceByRefreshToken, findDeviceByUUID, deleteDevice } from './lib/
 import { findUserByEmail } from './lib/users';
 
 export const handler = async (event, context, callback) => {
-  console.log('Received event:', JSON.stringify(event, null, 2));
+  console.log('Login handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
     callback(null, utils.validationError("Bad request"));
     return;
@@ -56,6 +56,7 @@ export const handler = async (event, context, callback) => {
         var device = await findDeviceByUUID(body.deviceIdentifier);
 
         if (device && device.user_uuid != user.uuid) {
+          console.log("Device supplied does not match user", { device, user });
           deleteDevice(body.deviceIdentifier);
           device = null
         }
@@ -74,7 +75,7 @@ export const handler = async (event, context, callback) => {
         return;
     }
   } catch (e) {
-
+    callback(null, utils.serverError("Internal error"));
   }
 };
 

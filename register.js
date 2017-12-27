@@ -5,7 +5,7 @@ import { findUserByEmail, createUser } from './lib/users';
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 export const handler = async (event, context, callback) => {
-  console.log('Received event:', JSON.stringify(event, null, 2));
+  console.log('Registration handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
     callback(null, utils.validationError("Bad request"));
     return;
@@ -28,14 +28,14 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const existingUser = await findUserByEmail(body.email);
-
-  if (existingUser) {
-    callback(null, utils.validationError("E-mail already taken"));
-    return;
-  }
-
   try {
+    const existingUser = await findUserByEmail(body.email);
+
+    if (existingUser) {
+      callback(null, utils.validationError("E-mail already taken"));
+      return;
+    }
+
     const user = await createUser(body);
 
     callback(null, {
