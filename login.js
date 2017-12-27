@@ -11,12 +11,13 @@ export const handler = async (event, context, callback) => {
 
   const body = JSON.parse(event.body);
 
-  var device;
+  let device;
+  let user;
 
   try {
     switch (body.grant_type) {
       case 'password':
-        const ok = [
+        if ([
           'client_id',
           'grant_type',
           'deviceIdentifier',
@@ -24,24 +25,23 @@ export const handler = async (event, context, callback) => {
           'deviceType',
           'password',
           'scope',
-          'username'
+          'username',
         ].some((param) => {
           if (!body[param]) {
             callback(null, utils.validationError(param + ' must be supplied'));
             return true;
           }
-        });
-
-        if (!ok) {
+          return false;
+        })) {
           return;
         }
 
-        if (body.scope != 'api offline_access') {
+        if (body.scope !== 'api offline_access') {
           callback(null, utils.validationError('Scope not supported'));
           return;
         }
 
-        const user = await User.scan()
+        user = await User.scan()
           .where('email').equals(body.email.toLowerCase())
           .execAsync()
           .Items[0];
@@ -58,7 +58,7 @@ export const handler = async (event, context, callback) => {
 
         device = await Device.getAsync(body.deviceIdentifier);
         console.log('aaa', device);
-        if (device && device.get('userUuid') != user.get('uuid')) {
+        if (device && device.get('userUuid') !== user.get('uuid')) {
           await device.destroyAsync();
           device = null;
         }
@@ -66,7 +66,7 @@ export const handler = async (event, context, callback) => {
         if (!device) {
           device = await Device.createAsync({
             userUuid: user.get('uuid'),
-            uuid: body.deviceIdentifier
+            uuid: body.deviceIdentifier,
           });
         }
 
@@ -83,7 +83,17 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        device = await findDeviceByRefreshToken(body.refresh_token);
+        device = await Device.scan()
+          .where('refresh_token').equals(body.refresh_token)
+          .execAsync()
+          .Items[0];
+
+        if (!device) {
+          callback(null, utils.validationError('Invalid refresh token'));
+          return;
+        }
+
+        user = await User.getAsync(device.get('userUuid'));
         break;
       default:
         callback(null, utils.validationError('Unsupported grant type'));
@@ -91,7 +101,7 @@ export const handler = async (event, context, callback) => {
     }
 
     device.set(regenerateTokens(user, device));
-    
+
     device = await device.updateAsync();
 
     callback(null, {
@@ -102,20 +112,9 @@ export const handler = async (event, context, callback) => {
         token_type: 'Bearer',
         refresh_token: device.get('refreshToken'),
         Key: user.get('key'),
-      })
+      }),
     });
   } catch (e) {
     callback(null, utils.serverError('Internal error'));
   }
-};
-
-function buildUser(body) {
-  return {
-    email: body.email.toLowerCase(),
-    password_hash: body.masterpasswordhash,
-    password_hint: body.masterpasswordhint,
-    key: body.key,
-    culture: 'en-US', // Hard-coded unless supplied from elsewhere
-    premium: true,
-  };
 };

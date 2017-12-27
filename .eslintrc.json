@@ -6,6 +6,7 @@
   "rules": {
     "no-console": ["off"],
     "import/prefer-default-export": ["off"],
-    "no-use-before-define": ["off"]
+    "no-use-before-define": ["off"],
+    "prefer-template": ["off"]
   }
 }

@@ -47,7 +47,7 @@ export const handler = async (event, context, callback) => {
   } catch (e) {
     callback(null, utils.serverError(e));
   }
-}
+};
 
 function buildUser(body) {
   return {
