@@ -1,5 +1,7 @@
 set -e
 
+./node_modules/.bin/eslint .
+
 STAGE="test${TRAVIS_BUILD_NUMBER}"
 
 serverless deploy --stage ${STAGE}
