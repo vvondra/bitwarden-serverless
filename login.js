@@ -1,11 +1,11 @@
 import * as utils from './lib/api_utils';
-import { findDeviceByRefreshToken, findDeviceByUUID, deleteDevice } from './lib/devices';
-import { findUserByEmail } from './lib/users';
+import { User, Device } from './lib/models';
+import { regenerateTokens, DEFAULT_VALIDITY } from './lib/bitwarden';
 
 export const handler = async (event, context, callback) => {
   console.log('Login handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
-    callback(null, utils.validationError("Bad request"));
+    callback(null, utils.validationError('Bad request'));
     return;
   }
 
@@ -27,7 +27,7 @@ export const handler = async (event, context, callback) => {
           'username'
         ].some((param) => {
           if (!body[param]) {
-            callback(null, utils.validationError(param + " must be supplied"));
+            callback(null, utils.validationError(param + ' must be supplied'));
             return true;
           }
         });
@@ -37,45 +37,75 @@ export const handler = async (event, context, callback) => {
         }
 
         if (body.scope != 'api offline_access') {
-          callback(null, utils.validationError("Scope not supported"));
+          callback(null, utils.validationError('Scope not supported'));
           return;
         }
 
-        const user = await findUserByEmail(body.username);
+        const user = await User.scan()
+          .where('email').equals(body.email.toLowerCase())
+          .execAsync()
+          .Items[0];
 
         if (!user) {
-          callback(null, utils.validationError("Invalid e-mail/username"));
+          callback(null, utils.validationError('Invalid e-mail/username'));
           return;
         }
 
         if (!user.matchesPasswordHash(body.password)) {
-          callback(null, utils.validationError("Invalid password"));
+          callback(null, utils.validationError('Invalid password'));
           return;
         }
 
-        var device = await findDeviceByUUID(body.deviceIdentifier);
-
-        if (device && device.user_uuid != user.uuid) {
-          console.log("Device supplied does not match user", { device, user });
-          deleteDevice(body.deviceIdentifier);
-          device = null
+        device = await Device.getAsync(body.deviceIdentifier);
+        console.log('aaa', device);
+        if (device && device.get('userUuid') != user.get('uuid')) {
+          await device.destroyAsync();
+          device = null;
         }
+
+        if (!device) {
+          device = await Device.createAsync({
+            userUuid: user.get('uuid'),
+            uuid: body.deviceIdentifier
+          });
+        }
+
+        device.set({
+          type: body.deviceType,
+          name: body.deviceName,
+          pushToken: body.devicePushToken,
+        });
 
         break;
       case 'refresh_token':
         if (!body.refresh_token) {
-          callback(null, utils.validationError("Refresh token must be supplied"));
+          callback(null, utils.validationError('Refresh token must be supplied'));
           return;
         }
 
         device = await findDeviceByRefreshToken(body.refresh_token);
         break;
       default:
-        callback(null, utils.validationError("Unsupported grant type"));
+        callback(null, utils.validationError('Unsupported grant type'));
         return;
     }
+
+    device.set(regenerateTokens(user, device));
+    
+    device = await device.updateAsync();
+
+    callback(null, {
+      statusCode: 200,
+      body: JSON.stringify({
+        access_token: device.get('accessToken'),
+        expires_in: DEFAULT_VALIDITY,
+        token_type: 'Bearer',
+        refresh_token: device.get('refreshToken'),
+        Key: user.get('key'),
+      })
+    });
   } catch (e) {
-    callback(null, utils.serverError("Internal error"));
+    callback(null, utils.serverError('Internal error'));
   }
 };
 
