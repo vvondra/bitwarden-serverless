@@ -1,3 +1,4 @@
+import querystring from 'querystring';
 import * as utils from './lib/api_utils';
 import { User, Device } from './lib/models';
 import { regenerateTokens, hashesMatch, DEFAULT_VALIDITY } from './lib/bitwarden';
@@ -9,7 +10,7 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const body = JSON.parse(event.body);
+  const body = querystring.parse(event.body);
 
   let device;
   let user;
@@ -89,9 +90,9 @@ export const handler = async (event, context, callback) => {
 
         console.log('Login attempt using refresh token', { refresh_token: body.refresh_token });
 
-        device = await Device.scan()
+        device = (await Device.scan()
           .where('refresh_token').equals(body.refresh_token)
-          .execAsync()
+          .execAsync())
           .Items[0];
 
         if (!device) {

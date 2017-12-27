@@ -46,7 +46,10 @@ describe("Login API", function () {
       var body = _.omit(getLoginBody(), param);
       var response = chakram.post(
         process.env.API_URL + "/identity/connect/token",
-        body
+        undefined,
+        {
+          form: body
+        }
       );
       return expect(response).to.have.status(400);
     });
@@ -56,7 +59,10 @@ describe("Login API", function () {
     var body = _.set(getLoginBody(), 'scope', 'invalid');
     var response = chakram.post(
       process.env.API_URL + "/identity/connect/token",
-      body
+      undefined,
+      {
+        form: body
+      }
     );
     return expect(response).to.have.status(400);
   });
@@ -65,7 +71,10 @@ describe("Login API", function () {
     var body = _.clone(getLoginBody());
     var response = chakram.post(
       process.env.API_URL + "/identity/connect/token",
-      body
+      undefined,
+      {
+        form: body
+      }
     );
     return expect(response).to.have.status(400);
   });
@@ -81,7 +90,10 @@ describe("Login API", function () {
     ).then(function(response) {
       var response = chakram.post(
         process.env.API_URL + "/identity/connect/token",
-        loginBody
+        undefined,
+        {
+          form: loginBody
+        }
       );
 
       return expect(response).to.have.status(200);
