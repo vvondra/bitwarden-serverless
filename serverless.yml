@@ -8,7 +8,6 @@ plugins:
 provider:
   name: aws
   runtime: nodejs6.10
-  profile: personal
   environment:
     DEVICES_TABLE: ${self:service}-${opt:stage, self:provider.stage}-devices
     USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
