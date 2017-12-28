@@ -43,10 +43,10 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        user = (await User.scan()
+        [user] = (await User.scan()
           .where('email').equals(body.username.toLowerCase())
           .execAsync())
-          .Items[0];
+          .Items;
 
         if (!user) {
           callback(null, utils.validationError('Invalid e-mail/username'));
@@ -90,10 +90,10 @@ export const handler = async (event, context, callback) => {
 
         console.log('Login attempt using refresh token', { refresh_token: body.refresh_token });
 
-        device = (await Device.scan()
+        [device] = (await Device.scan()
           .where('refresh_token').equals(body.refresh_token)
           .execAsync())
-          .Items[0];
+          .Items;
 
         if (!device) {
           console.error('Invalid refresh token', { refresh_token: body.refresh_token });
@@ -123,7 +123,7 @@ export const handler = async (event, context, callback) => {
       }),
     });
   } catch (e) {
-    console.error("Internal error during login", e);
+    console.error('Internal error during login', e);
     callback(null, utils.serverError('Internal error'));
   }
 };
