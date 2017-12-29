@@ -88,15 +88,15 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        console.log('Login attempt using refresh token', { refresh_token: body.refresh_token });
+        console.log('Login attempt using refresh token', { refreshToken: body.refresh_token });
 
         [device] = (await Device.scan()
-          .where('refresh_token').equals(body.refresh_token)
+          .where('refreshToken').equals(body.refresh_token)
           .execAsync())
           .Items;
 
         if (!device) {
-          console.error('Invalid refresh token', { refresh_token: body.refresh_token });
+          console.error('Invalid refresh token', { refreshToken: body.refresh_token });
           callback(null, utils.validationError('Invalid refresh token'));
           return;
         }

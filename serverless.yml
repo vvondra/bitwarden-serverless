@@ -37,7 +37,12 @@ functions:
       - http:
           method: post
           path: api/accounts/register
-
+  default:
+    handler: default.handler
+    events:
+      - http:
+          method: any
+          path: /{fallback}
 resources:
   Resources:
     UsersTable:

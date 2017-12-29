@@ -1,4 +1,5 @@
 var chakram = require('chakram');
+var jwt = require('jsonwebtoken');
 var _ = require('lodash');
 var expect = chakram.expect;
 
@@ -24,6 +25,14 @@ describe("Login API", function () {
       "deviceIdentifier": "aac2e34a-44db-42ab-a733-5322dd582c3d",
       "deviceName": "firefox",
       "devicePushToken": ""
+    };
+  }
+
+  function getRefreshTokenBody(token) {
+    return {
+      "grant_type": "refresh_token",
+      "client_id": "browser",
+      "refresh_token": (token || ""),
     };
   }
 
@@ -79,15 +88,16 @@ describe("Login API", function () {
     return expect(response).to.have.status(400);
   });
 
-  it("should return tokens if authentication successful", function () {
+  it("should fail on password mismatch", function () {
     var registrationBody = getRegistrationBody();
     var loginBody = getLoginBody();
     loginBody.username = registrationBody.email;
+    loginBody.password = "aaa";
 
     return chakram.post(
       process.env.API_URL + "/api/accounts/register",
       registrationBody
-    ).then(function(response) {
+    ).then(function (response) {
       var response = chakram.post(
         process.env.API_URL + "/identity/connect/token",
         undefined,
@@ -96,7 +106,124 @@ describe("Login API", function () {
         }
       );
 
-      return expect(response).to.have.status(200);
+      return expect(response).to.have.status(400);
+    });
+  });
+
+  it("should return tokens if authentication successful", function () {
+    var registrationBody = getRegistrationBody();
+    var loginBody = getLoginBody();
+    loginBody.username = registrationBody.email;
+
+    return chakram.post(
+      process.env.API_URL + "/api/accounts/register",
+      registrationBody
+    ).then(function (response) {
+      var response = chakram.post(
+        process.env.API_URL + "/identity/connect/token",
+        undefined,
+        {
+          form: loginBody
+        }
+      );
+
+      return response;
+    }).then(function (response) {
+      var body = response.body;
+      expect(response).to.have.status(200);
+
+      expect(body.expires_in).to.equal(3600);
+      expect(body.token_type).to.equal('Bearer');
+      expect(body.Key).to.equal(registrationBody.key);
+
+      var decoded = jwt.decode(body.access_token, { complete: true });
+
+      expect(decoded.payload.email).to.equal(loginBody.username);
+      expect(decoded.payload.nbf).to.be.below((new Date()).getTime());
+      expect(decoded.payload.exp).to.be.above((new Date()).getTime());
+
+      return chakram.wait();
+    });
+  });
+
+  describe.only('refresh token flow', function () {
+    it("should check for token in body", function () {
+      var body = _.omit(getRefreshTokenBody(), 'refresh_token');
+      var response = chakram.post(
+        process.env.API_URL + "/identity/connect/token",
+        undefined,
+        {
+          form: body
+        }
+      );
+      return expect(response).to.have.status(400);
+    });
+
+    it("should fail login for unknown refresh token", function () {
+      var registrationBody = getRegistrationBody();
+      var loginBody = getLoginBody();
+      var refreshToken;
+      var accessToken;
+      loginBody.username = registrationBody.email;
+
+      return chakram.post(
+        process.env.API_URL + "/api/accounts/register",
+        registrationBody
+      ).then(function () {
+        var response = chakram.post(
+          process.env.API_URL + "/identity/connect/token",
+          undefined,
+          {
+            form: getRefreshTokenBody("foobar")
+          }
+        );
+
+        return expect(response).to.have.status(400);
+      });
+    });
+
+    it("should generate a new access token when refresh token is provided", function () {
+      var registrationBody = getRegistrationBody();
+      var loginBody = getLoginBody();
+      var refreshToken;
+      var accessToken;
+      loginBody.username = registrationBody.email;
+
+      return chakram.post(
+        process.env.API_URL + "/api/accounts/register",
+        registrationBody
+      ).then(function (response) {
+        var response = chakram.post(
+          process.env.API_URL + "/identity/connect/token",
+          undefined,
+          {
+            form: loginBody
+          }
+        );
+
+        return response;
+      }).then(function (loginResponse) {
+        refreshToken = loginResponse.body.refresh_token;
+        accessToken = loginResponse.body.access_token;
+        var response = chakram.post(
+          process.env.API_URL + "/identity/connect/token",
+          undefined,
+          {
+            form: getRefreshTokenBody(refreshToken)
+          }
+        );
+
+        return response;
+      }).then(function (refreshResponse) {
+        var body = refreshResponse.body;
+
+        expect(refreshResponse).to.have.status(200);
+        expect(body.refresh_token).to.equal(refreshToken);
+        expect(body.access_token).not.to.equal(accessToken);
+        expect(body.Key).to.equal(registrationBody.key);
+
+        return chakram.wait();
+      });
     });
   });
 });
