@@ -146,7 +146,7 @@ describe("Login API", function () {
     });
   });
 
-  describe.only('refresh token flow', function () {
+  describe('refresh token flow', function () {
     it("should check for token in body", function () {
       var body = _.omit(getRefreshTokenBody(), 'refresh_token');
       var response = chakram.post(
