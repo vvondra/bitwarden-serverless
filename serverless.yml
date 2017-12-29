@@ -1,7 +1,6 @@
 service:
-  name: aws-nodejs-ecma-script
+  name: bitwarden-serverless
 
-# Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
 

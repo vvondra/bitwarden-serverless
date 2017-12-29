@@ -1,7 +1,7 @@
 {
-  "name": "aws-nodejs-ecma-script",
+  "name": "bitwarden-serverless",
   "version": "1.0.0",
-  "description": "Serverless webpack example using ecma script",
+  "description": "AWS Serverless implementation of the Bitwarden API",
   "scripts": {
     "test": "./test.sh"
   },
@@ -20,7 +20,7 @@
     "serverless-webpack": "^3.1.1",
     "webpack": "^3.3.0"
   },
-  "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
+  "author": "Vojtěch Vondra",
   "license": "MIT",
   "dependencies": {
     "aws-sdk": "^2.175.0",
