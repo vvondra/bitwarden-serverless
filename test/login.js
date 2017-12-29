@@ -36,23 +36,37 @@ describe("Login API", function () {
     };
   }
 
-  it("should check for request body", function () {
-    var response = chakram.post(process.env.API_URL + "/identity/connect/token");
-    return expect(response).to.have.status(400);
-  });
+  describe('parameter validation', function() {
+    it("should check for request body", function () {
+      var response = chakram.post(process.env.API_URL + "/identity/connect/token");
+      return expect(response).to.have.status(400);
+    });
 
-  [
-    'client_id',
-    'grant_type',
-    'deviceIdentifier',
-    'deviceName',
-    'deviceType',
-    'password',
-    'scope',
-    'username'
-  ].forEach(function (param) {
-    it("should check for " + param + " in body", function () {
-      var body = _.omit(getLoginBody(), param);
+    [
+      'client_id',
+      'grant_type',
+      'deviceIdentifier',
+      'deviceName',
+      'deviceType',
+      'password',
+      'scope',
+      'username'
+    ].forEach(function (param) {
+      it("should check for " + param + " in body", function () {
+        var body = _.omit(getLoginBody(), param);
+        var response = chakram.post(
+          process.env.API_URL + "/identity/connect/token",
+          undefined,
+          {
+            form: body
+          }
+        );
+        return expect(response).to.have.status(400);
+      });
+    });
+
+    it("should check for invalid scope", function () {
+      var body = _.set(getLoginBody(), 'scope', 'invalid');
       var response = chakram.post(
         process.env.API_URL + "/identity/connect/token",
         undefined,
@@ -62,18 +76,6 @@ describe("Login API", function () {
       );
       return expect(response).to.have.status(400);
     });
-  });
-
-  it("should check for invalid scope", function () {
-    var body = _.set(getLoginBody(), 'scope', 'invalid');
-    var response = chakram.post(
-      process.env.API_URL + "/identity/connect/token",
-      undefined,
-      {
-        form: body
-      }
-    );
-    return expect(response).to.have.status(400);
   });
 
   it("should fail on non-existent user", function () {

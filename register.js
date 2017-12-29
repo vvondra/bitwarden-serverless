@@ -8,9 +8,9 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const body = JSON.parse(event.body);
+  const body = utils.normalizeBody(JSON.parse(event.body));
 
-  if (!body.masterPasswordHash) {
+  if (!body.masterpasswordhash) {
     callback(null, utils.validationError('masterPasswordHash cannot be blank'));
     return;
   }
@@ -52,8 +52,8 @@ export const handler = async (event, context, callback) => {
 function buildUser(body) {
   return {
     email: body.email.toLowerCase(),
-    passwordHash: body.masterPasswordHash,
-    passwordHint: body.masterPasswordHint,
+    passwordHash: body.masterpasswordhash,
+    passwordHint: body.masterpasswordhint,
     key: body.key,
     culture: 'en-US', // Hard-coded unless supplied from elsewhere
     premium: true,

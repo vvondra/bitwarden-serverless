@@ -10,7 +10,7 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const body = querystring.parse(event.body);
+  const body = utils.normalizeBody(querystring.parse(event.body));
 
   let device;
   let user;
@@ -21,9 +21,9 @@ export const handler = async (event, context, callback) => {
         if ([
           'client_id',
           'grant_type',
-          'deviceIdentifier',
-          'deviceName',
-          'deviceType',
+          'deviceidentifier',
+          'devicename',
+          'devicetype',
           'password',
           'scope',
           'username',
@@ -58,7 +58,7 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        device = await Device.getAsync(body.deviceIdentifier);
+        device = await Device.getAsync(body.deviceidentifier);
         console.log('aaa', device);
         if (device && device.get('userUuid') !== user.get('uuid')) {
           await device.destroyAsync();
@@ -68,17 +68,17 @@ export const handler = async (event, context, callback) => {
         if (!device) {
           device = await Device.createAsync({
             userUuid: user.get('uuid'),
-            uuid: body.deviceIdentifier,
+            uuid: body.deviceidentifier,
           });
         }
 
         device.set({
-          type: body.deviceType,
-          name: body.deviceName,
+          type: body.devicetype,
+          name: body.devicename,
         });
 
-        if (body.devicePushToken) {
-          device.set({ pushToken: body.devicePushToken });
+        if (body.devicepushtoken) {
+          device.set({ pushToken: body.devicepushtoken });
         }
 
         break;
