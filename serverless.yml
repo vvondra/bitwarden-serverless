@@ -10,6 +10,7 @@ provider:
   environment:
     DEVICES_TABLE: ${self:service}-${opt:stage, self:provider.stage}-devices
     USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
+    CIPHERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-ciphers
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -22,6 +23,7 @@ provider:
       Resource:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DEVICES_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CIPHERS_TABLE}"
 
 functions:
   login:
@@ -67,6 +69,21 @@ resources:
         KeySchema:
           - AttributeName: uuid
             KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    CiphersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.CIPHERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userUuid
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

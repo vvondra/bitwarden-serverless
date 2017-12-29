@@ -29,3 +29,10 @@ I do however trust AWS infrastructure and with the traffic pattern needed for a 
 Javascript sources are transpiled using webpack and Babel to the AWS supported Node.js 6.10 target. Transpiling and bundling is part of the serverless deployment workflow.
 
 The API is tested using blackbox integration tests against a fresh deployment on AWS. Simply run with `./test.sh` with AWS credentials configured. This will create a temporary stack in AWS, run the tests against the API and tear down the stack after completion.
+
+## TODO
+
+- [ ] Secret mgmt for JWT tokens
+- [ ] Folder API
+- [ ] Cipher API
+- [ ] 2FA
