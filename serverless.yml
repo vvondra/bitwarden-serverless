@@ -26,19 +26,19 @@ provider:
 
 functions:
   login:
-    handler: login.handler
+    handler: src/login.handler
     events:
       - http:
           method: post
           path: identity/connect/token
   register:
-    handler: register.handler
+    handler: src/register.handler
     events:
       - http:
           method: post
           path: api/accounts/register
   default:
-    handler: default.handler
+    handler: src/default.handler
     events:
       - http:
           method: any
