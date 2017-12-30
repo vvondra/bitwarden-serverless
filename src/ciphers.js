@@ -68,6 +68,11 @@ export const putHandler = async (event, context, callback) => {
   try {
     let cipher = await Cipher.getAsync(user.get('uuid'), cipherUuid);
 
+    if (!cipher) {
+      callback(null, utils.validationError('Unknown cipher'));
+      return;
+    }
+
     cipher.set(buildCipherDocument(body, user));
 
     cipher = await cipher.updateAsync();

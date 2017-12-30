@@ -65,6 +65,5 @@ describe("Registration API", function () {
     }).then(function (response) {
       expect(response).to.have.status(400);
     });
-
   });
 });

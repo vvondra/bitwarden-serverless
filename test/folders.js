@@ -143,6 +143,4 @@ describe("Folders API", function () {
       });
     });
   });
-
-
 });
