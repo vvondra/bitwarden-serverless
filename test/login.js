@@ -141,8 +141,8 @@ describe("Login API", function () {
       var decoded = jwt.decode(body.access_token, { complete: true });
 
       expect(decoded.payload.email).to.equal(loginBody.username);
-      expect(decoded.payload.nbf).to.be.below((new Date()).getTime());
-      expect(decoded.payload.exp).to.be.above((new Date()).getTime());
+      expect(decoded.payload.nbf).to.be.below((new Date()).getTime() / 1000);
+      expect(decoded.payload.exp).to.be.above((new Date()).getTime() / 1000);
 
       return chakram.wait();
     });
@@ -215,7 +215,10 @@ describe("Login API", function () {
           }
         );
 
-        return response;
+        return new Promise(function(resolve) {
+          // Wait a second so the access token changes
+          setTimeout(() => resolve(response), 1000);
+        });
       }).then(function (refreshResponse) {
         var body = refreshResponse.body;
 
