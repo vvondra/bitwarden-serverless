@@ -217,7 +217,7 @@ describe("Login API", function () {
 
         return new Promise(function(resolve) {
           // Wait a second so the access token changes
-          setTimeout(() => resolve(response), 1000);
+          setTimeout(() => resolve(response), 1500);
         });
       }).then(function (refreshResponse) {
         var body = refreshResponse.body;

@@ -21,7 +21,6 @@ export const handler = async (event, context, callback) => {
         if ([
           'client_id',
           'grant_type',
-          'deviceidentifier',
           'devicename',
           'devicetype',
           'password',
@@ -58,11 +57,13 @@ export const handler = async (event, context, callback) => {
           return;
         }
 
-        device = await Device.getAsync(body.deviceidentifier);
-        console.log('aaa', device);
-        if (device && device.get('userUuid') !== user.get('uuid')) {
-          await device.destroyAsync();
-          device = null;
+        // Web vault doesn't send device identifier
+        if (body.deviceidentifier) {
+          device = await Device.getAsync(body.deviceidentifier);
+          if (device && device.get('userUuid') !== user.get('uuid')) {
+            await device.destroyAsync();
+            device = null;
+          }
         }
 
         if (!device) {
