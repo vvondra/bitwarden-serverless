@@ -36,3 +36,4 @@ The API is tested using blackbox integration tests against a fresh deployment on
 - [ ] Folder API
 - [ ] Cipher API
 - [ ] 2FA
+- [ ] User-friendly logging and response messages

@@ -79,8 +79,8 @@ export function buildCipherDocument(body, user) {
 
   const params = {
     userUuid: user.get('uuid'),
-    organizationUuid: body.organizationuuid,
-    folderUuid: body.folderuuid,
+    organizationUuid: body.organizationid,
+    folderUuid: body.folderid,
     favorite: !!body.favorite,
     type: parseInt(body.type, 10),
   };
