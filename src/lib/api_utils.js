@@ -22,8 +22,8 @@ export function validationError(message) {
   };
 }
 
-export function serverError(message) {
-  console.log('Server error', { message });
+export function serverError(message, error) {
+  console.log('Server error', { message, error });
   return {
     statusCode: 500,
     body: JSON.stringify({

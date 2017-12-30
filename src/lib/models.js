@@ -19,9 +19,7 @@ export const Device = dynogels.define('Device', {
     name: Joi.string(),
     type: Joi.number(),
     pushToken: Joi.string(),
-    accessToken: Joi.string(),
     refreshToken: Joi.string(),
-    tokenExpiresAt: Joi.date().timestamp(),
   },
 });
 
@@ -60,7 +58,7 @@ export const Cipher = dynogels.define('Cipher', {
     folderUuid: Joi.string(),
     organizationUuid: Joi.string(),
     type: Joi.number(),
-    data: Joi.binary(),
+    data: Joi.object(),
     favorite: Joi.boolean(),
     attachments: Joi.binary(),
   },

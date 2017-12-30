@@ -108,22 +108,24 @@ export const handler = async (event, context, callback) => {
         return;
     }
 
-    device.set(regenerateTokens(user, device));
+    const tokens = regenerateTokens(user, device);
+
+    device.set({ refreshToken: tokens.refreshToken });
 
     device = await device.updateAsync();
 
     callback(null, {
       statusCode: 200,
       body: JSON.stringify({
-        access_token: device.get('accessToken'),
+        access_token: tokens.accessToken,
         expires_in: DEFAULT_VALIDITY,
         token_type: 'Bearer',
-        refresh_token: device.get('refreshToken'),
+        refresh_token: tokens.refreshToken,
         Key: user.get('key'),
       }),
     });
   } catch (e) {
     console.error('Internal error during login', e);
-    callback(null, utils.serverError('Internal error'));
+    callback(null, utils.serverError('Internal error', e));
   }
 };

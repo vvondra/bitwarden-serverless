@@ -45,7 +45,7 @@ export const handler = async (event, context, callback) => {
       body: '',
     });
   } catch (e) {
-    callback(null, utils.serverError(e));
+    callback(null, utils.serverError(e.message, e));
   }
 };
 

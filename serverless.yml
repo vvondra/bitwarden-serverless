@@ -38,6 +38,30 @@ functions:
       - http:
           method: post
           path: api/accounts/register
+  sync:
+    handler: src/sync.handler
+    events:
+      - http:
+          method: get
+          path: api/sync
+  cipher_post:
+    handler: src/ciphers.postHandler
+    events:
+      - http:
+          method: post
+          path: api/ciphers
+  cipher_put:
+    handler: src/ciphers.putHandler
+    events:
+      - http:
+          method: put
+          path: api/ciphers/{uuid}
+  cipher_delete:
+    handler: src/ciphers.deleteHandler
+    events:
+      - http:
+          method: delete
+          path: api/ciphers/{uuid}
   default:
     handler: src/default.handler
     events:
@@ -77,6 +101,8 @@ resources:
       Properties:
         TableName: ${self:provider.environment.CIPHERS_TABLE}
         AttributeDefinitions:
+          - AttributeName: userUuid
+            AttributeType: S
           - AttributeName: uuid
             AttributeType: S
         KeySchema:
