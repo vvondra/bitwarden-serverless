@@ -17,10 +17,10 @@ export const Device = dynogels.define('Device', {
   schema: {
     uuid: dynogels.types.uuid(),
     userUuid: Joi.string().required(),
-    name: Joi.string(),
+    name: Joi.string().allow(null),
     type: Joi.number(),
-    pushToken: Joi.string(),
-    refreshToken: Joi.string(),
+    pushToken: Joi.string().allow(null),
+    refreshToken: Joi.string().allow(null),
   },
 });
 
@@ -37,11 +37,11 @@ export const User = dynogels.define('User', {
     premium: Joi.boolean(),
     name: Joi.string(),
     passwordHash: Joi.string().required(),
-    passwordHint: Joi.string(),
+    passwordHint: Joi.string().allow(null),
     key: Joi.string(),
     privateKey: Joi.binary(),
     publicKey: Joi.binary(),
-    totpSecret: Joi.string(),
+    totpSecret: Joi.string().allow(null),
     securityStamp: dynogels.types.uuid(),
     culture: Joi.string(),
   },
@@ -56,8 +56,8 @@ export const Cipher = dynogels.define('Cipher', {
   schema: {
     userUuid: Joi.string().required(),
     uuid: dynogels.types.uuid(), // Auto-generated
-    folderUuid: Joi.string(),
-    organizationUuid: Joi.string(),
+    folderUuid: Joi.string().allow(null),
+    organizationUuid: Joi.string().allow(null),
     type: Joi.number(),
     data: Joi.object(),
     favorite: Joi.boolean(),
