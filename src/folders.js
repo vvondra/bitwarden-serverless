@@ -71,6 +71,11 @@ export const putHandler = async (event, context, callback) => {
   try {
     let folder = await Folder.getAsync(user.get('uuid'), folderUuid);
 
+    if (!folder) {
+      callback(null, utils.validationError('Unknown folder'));
+      return;
+    }
+
     folder.set({ name: body.name });
 
     folder = await folder.updateAsync();

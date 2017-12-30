@@ -18,6 +18,7 @@
     "eslint-plugin-import": "^2.8.0",
     "lodash": "^4.17.4",
     "mocha": "^4.0.1",
+    "mocha-steps": "^1.1.0",
     "serverless-webpack": "^3.1.1",
     "webpack": "^3.3.0"
   },
