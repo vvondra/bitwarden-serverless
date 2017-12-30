@@ -7,10 +7,13 @@ plugins:
 provider:
   name: aws
   runtime: nodejs6.10
+  memorySize: 256
+  timeout: 10
   environment:
     DEVICES_TABLE: ${self:service}-${opt:stage, self:provider.stage}-devices
     USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
     CIPHERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-ciphers
+    FOLDERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-folders
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -24,6 +27,7 @@ provider:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DEVICES_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CIPHERS_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.FOLDERS_TABLE}"
 
 functions:
   login:
@@ -62,12 +66,31 @@ functions:
       - http:
           method: delete
           path: api/ciphers/{uuid}
+  folder_post:
+    handler: src/folders.postHandler
+    events:
+      - http:
+          method: post
+          path: api/folders
+  folder_put:
+    handler: src/folders.putHandler
+    events:
+      - http:
+          method: put
+          path: api/folders/{uuid}
+  folder_delete:
+    handler: src/folders.deleteHandler
+    events:
+      - http:
+          method: delete
+          path: api/folders/{uuid}
   default:
     handler: src/default.handler
     events:
       - http:
           method: any
           path: /{fallback}
+
 resources:
   Resources:
     UsersTable:
@@ -100,6 +123,23 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.CIPHERS_TABLE}
+        AttributeDefinitions:
+          - AttributeName: userUuid
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userUuid
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    FoldersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.FOLDERS_TABLE}
         AttributeDefinitions:
           - AttributeName: userUuid
             AttributeType: S

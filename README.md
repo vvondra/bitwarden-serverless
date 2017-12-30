@@ -34,6 +34,6 @@ The API is tested using blackbox integration tests against a fresh deployment on
 
 - [ ] Secret mgmt for JWT tokens
 - [ ] Folder API
-- [ ] Cipher API
 - [ ] 2FA
 - [ ] User-friendly logging and response messages
+- [ ] Schema validation on input using Joi

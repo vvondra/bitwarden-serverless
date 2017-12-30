@@ -1,7 +1,7 @@
 import * as utils from './lib/api_utils';
 import { loadContextFromHeader } from './lib/bitwarden';
-import { mapUser, mapCipher } from './lib/mappers';
-import { Cipher } from './lib/models';
+import { mapUser, mapCipher, mapFolder } from './lib/mappers';
+import { Cipher, Folder } from './lib/models';
 
 export const handler = async (event, context, callback) => {
   console.log('Sync handler triggered', JSON.stringify(event, null, 2));
@@ -14,8 +14,11 @@ export const handler = async (event, context, callback) => {
     return;
   }
   let ciphers;
+  let folders;
   try {
+    // TODO await in parallel
     ciphers = (await Cipher.query(user.get('uuid')).execAsync()).Items;
+    folders = (await Folder.query(user.get('uuid')).execAsync()).Items;
   } catch (e) {
     callback(null, utils.serverError('Cannot load vault items', e));
     return;
@@ -23,7 +26,7 @@ export const handler = async (event, context, callback) => {
 
   const response = {
     Profile: mapUser(user),
-    Folders: [],
+    Folders: folders.map(mapFolder),
     Ciphers: ciphers.map(mapCipher),
     Domains: {
       EquivalentDomains: null,

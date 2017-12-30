@@ -1,11 +1,8 @@
 export function mapCipher(cipher) {
-  // dynogels sets updated at only after update
-  const date = cipher.get('updatedAt') || cipher.get('createdAt');
-
   return {
     Id: cipher.get('uuid'),
     Type: cipher.get('type'),
-    RevisionDate: date.replace('Z', '.000000Z'), // Ugly, but hey
+    RevisionDate: getRevisionDate(cipher),
     FolderId: cipher.get('folderUuid'),
     Favorite: cipher.get('favorite'),
     OrganizationId: cipher.get('organizationUuid'),
@@ -32,4 +29,20 @@ export function mapUser(user) {
     Organizations: [],
     Object: 'profile',
   };
+}
+
+export function mapFolder(folder) {
+  return {
+    Id: folder.get('uuid'),
+    Name: folder.get('name'),
+    RevisionDate: getRevisionDate(folder),
+    Object: 'folder',
+  };
+}
+
+function getRevisionDate(object) {
+  // dynogels sets updated at only after update
+  const date = object.get('updatedAt') || object.get('createdAt');
+
+  return date.replace('Z', '.000000Z'); // Ugly, but hey
 }

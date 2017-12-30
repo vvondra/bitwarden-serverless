@@ -4,6 +4,7 @@ import Joi from 'joi';
 const devicesTableName = process.env.DEVICES_TABLE;
 const usersTableName = process.env.USERS_TABLE;
 const cipherTableName = process.env.CIPHERS_TABLE;
+const folderTableName = process.env.FOLDERS_TABLE;
 
 // Bind internal dynogels logger to console, it supports warn/info/error as needed
 dynogels.log = console;
@@ -61,5 +62,18 @@ export const Cipher = dynogels.define('Cipher', {
     data: Joi.object(),
     favorite: Joi.boolean(),
     attachments: Joi.binary(),
+  },
+});
+
+export const Folder = dynogels.define('Folder', {
+  hashKey: 'userUuid',
+  rangeKey: 'uuid',
+  timestamps: true,
+  tableName: folderTableName,
+
+  schema: {
+    userUuid: Joi.string().required(),
+    uuid: dynogels.types.uuid(), // Auto-generated
+    name: Joi.string().required(),
   },
 });
