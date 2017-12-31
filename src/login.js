@@ -96,7 +96,8 @@ export const handler = async (event, context, callback) => {
         }
 
         device.set({
-          type: body.devicetype,
+          // Browser extension sends body, web and mobile send header
+          type: event.headers['Device-Type'] || body.devicetype,
           name: body.devicename,
         });
 

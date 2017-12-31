@@ -28,6 +28,20 @@ describe("Login API", function () {
     };
   }
 
+  function getAndroidLoginBody() {
+    return {
+      grant_type: 'password',
+      username: 'tester@tester.cz',
+      password: 'r5CFRR+n9NQI8a525FY+0BPR0HGOjVJX0cR1KEMnIOo=',
+      scope: 'api offline_access',
+      client_id: 'mobile',
+      DeviceType: 'Android',
+      DeviceIdentifier: '575e8d32-4479-4f13-936e-53201f9814e7',
+      DeviceName: 'ONEPLUS A3003',
+      DevicePushToken: ''
+    };
+  }
+
   function getRefreshTokenBody(token) {
     return {
       "grant_type": "refresh_token",
@@ -145,6 +159,30 @@ describe("Login API", function () {
       expect(decoded.payload.exp).to.be.above((new Date()).getTime() / 1000);
 
       return chakram.wait();
+    });
+  });
+
+  it("should return tokens if authentication successful from mobile app", function () {
+    var registrationBody = getRegistrationBody();
+    var loginBody = getAndroidLoginBody();
+    loginBody.username = registrationBody.email;
+
+    return chakram.post(
+      process.env.API_URL + "/api/accounts/register",
+      registrationBody
+    ).then(function (response) {
+      var response = chakram.post(
+        process.env.API_URL + "/identity/connect/token",
+        undefined,
+        {
+          form: loginBody,
+          headers: {
+            'Device-Type': 0
+          }
+        }
+      );
+
+      return expect(response).to.have.status(200);
     });
   });
 
