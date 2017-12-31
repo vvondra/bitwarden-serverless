@@ -134,7 +134,7 @@ export function buildUserDocument(body) {
   };
 }
 
-function generateSecret() {
+export function generateSecret() {
   return crypto.randomBytes(64).toString('hex');
 }
 

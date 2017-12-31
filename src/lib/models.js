@@ -43,6 +43,7 @@ export const User = dynogels.define('User', {
     privateKey: Joi.binary(),
     publicKey: Joi.binary(),
     totpSecret: Joi.string().allow(null),
+    totpSecretTemp: Joi.string().allow(null),
     securityStamp: dynogels.types.uuid(),
     culture: Joi.string(),
   },

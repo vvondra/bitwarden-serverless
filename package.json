@@ -31,6 +31,8 @@
     "dynogels-promisified": "^1.0.4",
     "joi": "^13.0.2",
     "jsonwebtoken": "^8.1.0",
-    "object.entries": "^1.0.4"
+    "object.entries": "^1.0.4",
+    "qrcode": "^1.2.0",
+    "speakeasy": "^2.0.0"
   }
 }
