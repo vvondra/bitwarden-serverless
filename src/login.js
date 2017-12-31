@@ -6,7 +6,7 @@ import { regenerateTokens, hashesMatch, DEFAULT_VALIDITY } from './lib/bitwarden
 export const handler = async (event, context, callback) => {
   console.log('Login handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
-    callback(null, utils.validationError('Bad request'));
+    callback(null, utils.validationError('Missing request body'));
     return;
   }
 
@@ -48,12 +48,12 @@ export const handler = async (event, context, callback) => {
           .Items;
 
         if (!user) {
-          callback(null, utils.validationError('Invalid e-mail/username'));
+          callback(null, utils.validationError('Unknown e-mail/username'));
           return;
         }
 
         if (!hashesMatch(user.get('passwordHash'), body.password)) {
-          callback(null, utils.validationError('Invalid password'));
+          callback(null, utils.validationError('Password doesn\'t match'));
           return;
         }
 
@@ -126,7 +126,6 @@ export const handler = async (event, context, callback) => {
       }),
     });
   } catch (e) {
-    console.error('Internal error during login', e);
     callback(null, utils.serverError('Internal error', e));
   }
 };

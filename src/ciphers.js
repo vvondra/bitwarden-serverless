@@ -7,7 +7,7 @@ export const postHandler = async (event, context, callback) => {
   console.log('Cipher create handler triggered', JSON.stringify(event, null, 2));
 
   if (!event.body) {
-    callback(null, utils.validationError('Bad request'));
+    callback(null, utils.validationError('Request body is missing'));
     return;
   }
 
@@ -17,12 +17,12 @@ export const postHandler = async (event, context, callback) => {
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, utils.validationError('Cannot load user from access token: ' + e));
+    callback(null, utils.validationError('User not found: ' + e.message));
     return;
   }
 
   if (!body.type || !body.name) {
-    callback(null, utils.validationError('Missing type or name of cipher'));
+    callback(null, utils.validationError('Missing name and type of vault item'));
     return;
   }
 
@@ -34,14 +34,14 @@ export const postHandler = async (event, context, callback) => {
       body: JSON.stringify({ ...mapCipher(cipher), Edit: true }),
     });
   } catch (e) {
-    callback(null, utils.serverError('Error saving cipher', e));
+    callback(null, utils.serverError('Server error saving vault item', e));
   }
 };
 
 export const putHandler = async (event, context, callback) => {
   console.log('Cipher edit handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
-    callback(null, utils.validationError('Bad request'));
+    callback(null, utils.validationError('Request body is missing'));
     return;
   }
 
@@ -51,25 +51,25 @@ export const putHandler = async (event, context, callback) => {
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, utils.validationError('Cannot load user from access token: ' + e));
+    callback(null, utils.validationError('User not found: ' + e.message));
     return;
   }
 
   if (!body.type || !body.name) {
-    callback(null, utils.validationError('Missing type or name of cipher'));
+    callback(null, utils.validationError('Missing name and type of vault item'));
     return;
   }
 
   const cipherUuid = event.pathParameters.uuid;
   if (!cipherUuid) {
-    callback(null, utils.validationError('Missing cipher UUID'));
+    callback(null, utils.validationError('Missing vault item ID'));
   }
 
   try {
     let cipher = await Cipher.getAsync(user.get('uuid'), cipherUuid);
 
     if (!cipher) {
-      callback(null, utils.validationError('Unknown cipher'));
+      callback(null, utils.validationError('Unknown vault item'));
       return;
     }
 
@@ -82,7 +82,7 @@ export const putHandler = async (event, context, callback) => {
       body: JSON.stringify({ ...mapCipher(cipher), Edit: true }),
     });
   } catch (e) {
-    callback(null, utils.serverError('Error saving cipher', e));
+    callback(null, utils.serverError('Server error saving vault item', e));
   }
 };
 
@@ -93,12 +93,12 @@ export const deleteHandler = async (event, context, callback) => {
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, utils.validationError('Cannot load user from access token'));
+    callback(null, utils.validationError('User not found: ' + e.message));
   }
 
   const cipherUuid = event.pathParameters.uuid;
   if (!cipherUuid) {
-    callback(null, utils.validationError('Missing cipher UUID'));
+    callback(null, utils.validationError('Missing vault item ID'));
   }
 
   try {

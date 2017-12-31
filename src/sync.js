@@ -10,7 +10,7 @@ export const handler = async (event, context, callback) => {
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, utils.validationError('Cannot load user from access token'));
+    callback(null, utils.validationError('User not found'));
     return;
   }
   let ciphers;
@@ -20,7 +20,7 @@ export const handler = async (event, context, callback) => {
     ciphers = (await Cipher.query(user.get('uuid')).execAsync()).Items;
     folders = (await Folder.query(user.get('uuid')).execAsync()).Items;
   } catch (e) {
-    callback(null, utils.serverError('Cannot load vault items', e));
+    callback(null, utils.serverError('Server error loading vault items', e));
     return;
   }
 

@@ -7,7 +7,7 @@ export const postHandler = async (event, context, callback) => {
   console.log('Folder create handler triggered', JSON.stringify(event, null, 2));
 
   if (!event.body) {
-    callback(null, utils.validationError('Bad request'));
+    callback(null, utils.validationError('Missing request body'));
     return;
   }
 
@@ -17,7 +17,7 @@ export const postHandler = async (event, context, callback) => {
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, utils.validationError('Cannot load user from access token: ' + e));
+    callback(null, utils.validationError('User not found: ' + e.message));
     return;
   }
 
@@ -37,14 +37,14 @@ export const postHandler = async (event, context, callback) => {
       body: JSON.stringify(mapFolder(folder)),
     });
   } catch (e) {
-    callback(null, utils.serverError('Error saving folder', e));
+    callback(null, utils.serverError('Server error saving folder', e));
   }
 };
 
 export const putHandler = async (event, context, callback) => {
   console.log('Folder edit handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
-    callback(null, utils.validationError('Bad request'));
+    callback(null, utils.validationError('Missing request body'));
     return;
   }
 
@@ -65,7 +65,7 @@ export const putHandler = async (event, context, callback) => {
 
   const folderUuid = event.pathParameters.uuid;
   if (!folderUuid) {
-    callback(null, utils.validationError('Missing folder UUID'));
+    callback(null, utils.validationError('Missing folder ID'));
   }
 
   try {
@@ -85,7 +85,7 @@ export const putHandler = async (event, context, callback) => {
       body: JSON.stringify(mapFolder(folder)),
     });
   } catch (e) {
-    callback(null, utils.serverError('Error saving folder', e));
+    callback(null, utils.serverError('Server error saving folder', e));
   }
 };
 
@@ -96,12 +96,12 @@ export const deleteHandler = async (event, context, callback) => {
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, utils.validationError('Cannot load user from access token'));
+    callback(null, utils.validationError('User not found'));
   }
 
   const folderUuid = event.pathParameters.uuid;
   if (!folderUuid) {
-    callback(null, utils.validationError('Missing folder UUID'));
+    callback(null, utils.validationError('Missing folder ID'));
   }
 
   try {

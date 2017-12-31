@@ -4,7 +4,7 @@ import { User } from './lib/models';
 export const handler = async (event, context, callback) => {
   console.log('Registration handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
-    callback(null, utils.validationError('Bad request'));
+    callback(null, utils.validationError('Missing request body'));
     return;
   }
 
