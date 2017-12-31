@@ -1,4 +1,5 @@
 import querystring from 'querystring';
+import speakeasy from 'speakeasy';
 import * as utils from './lib/api_utils';
 import { User, Device } from './lib/models';
 import { regenerateTokens, hashesMatch, DEFAULT_VALIDITY } from './lib/bitwarden';
@@ -55,6 +56,27 @@ export const handler = async (event, context, callback) => {
         if (!hashesMatch(user.get('passwordHash'), body.password)) {
           callback(null, utils.validationError('Password doesn\'t match'));
           return;
+        }
+
+        if (user.get('totpSecret')) {
+          const verified = speakeasy.totp.verify({
+            secret: user.get('totpSecret'),
+            encoding: 'base32',
+            token: body.twofactortoken,
+          });
+
+          if (!verified) {
+            callback(null, {
+              statusCode: 400,
+              body: JSON.stringify({
+                error: 'invalid_grant',
+                error_description: 'Two factor required.',
+                TwoFactorProviders: [0],
+                TwoFactorProviders2: { 0: null },
+              }),
+            });
+            return;
+          }
         }
 
         // Web vault doesn't send device identifier

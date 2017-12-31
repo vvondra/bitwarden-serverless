@@ -22,7 +22,7 @@ export function mapUser(user) {
     Premium: user.get('premium'),
     MasterPasswordHint: user.get('passwordHint'),
     Culture: user.get('culture'),
-    TwoFactorEnabled: false,
+    TwoFactorEnabled: !!user.get('totpSecret'),
     Key: user.get('key'),
     PrivateKey: null,
     SecurityStamp: user.get('securityStamp'),
