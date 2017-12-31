@@ -7,7 +7,8 @@ export const setupHandler = async (event, context, callback) => {
   console.log('2FA setup handler triggered', JSON.stringify(event, null, 2));
 
   if (!event.email) {
-    callback(null, utils.validationError('E-mail must be supplied'));
+    callback(null, 'E-mail must be supplied');
+    return;
   }
 
   let user;
@@ -16,7 +17,8 @@ export const setupHandler = async (event, context, callback) => {
       .where('email').equals(event.email.toLowerCase())
       .execAsync()).Items;
   } catch (e) {
-    callback(null, utils.validationError('User not found'));
+    callback(null, 'User not found');
+    return;
   }
 
   try {
@@ -29,7 +31,7 @@ export const setupHandler = async (event, context, callback) => {
 
     callback(null, code);
   } catch (e) {
-    callback(null, utils.validationError(e.toString()));
+    callback(null, 'ERROR: ' + e);
   }
 };
 
@@ -37,11 +39,13 @@ export const completeHandler = async (event, context, callback) => {
   console.log('2FA complete handler triggered', JSON.stringify(event, null, 2));
 
   if (!event.email) {
-    callback(null, utils.validationError('E-mail must be supplied'));
+    callback(null, 'E-mail must be supplied');
+    return;
   }
 
   if (!event.code) {
-    callback(null, utils.validationError('Verification code must be supplied'));
+    callback(null, 'Verification code must be supplied');
+    return;
   }
 
   let user;
@@ -50,7 +54,8 @@ export const completeHandler = async (event, context, callback) => {
       .where('email').equals(event.email.toLowerCase())
       .execAsync()).Items;
   } catch (e) {
-    callback(null, utils.validationError('User not found'));
+    callback(null, 'User not found');
+    return;
   }
 
   try {
@@ -74,6 +79,6 @@ export const completeHandler = async (event, context, callback) => {
       callback(null, 'ERROR, Could not verify supplied code, please try again.');
     }
   } catch (e) {
-    callback(null, utils.validationError(e.toString()));
+    callback(null, 'ERROR: ' + e);
   }
 };
