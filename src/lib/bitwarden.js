@@ -4,7 +4,6 @@ import bufferEq from 'buffer-equal-constant-time';
 import entries from 'object.entries';
 import { User, Device } from './models';
 
-const JWT_SECRET = 'blabla';
 const JWT_DEFAULT_ALGORITHM = 'HS256';
 
 export const DEFAULT_VALIDITY = 60 * 60;
@@ -14,10 +13,10 @@ export async function loadContextFromHeader(header) {
     throw new Error('Missing Authorization header');
   }
 
-  const payload = extractVerifiedPayload(header.replace(/^(Bearer)/, '').trim());
+  const token = header.replace(/^(Bearer)/, '').trim();
+  const payload = jwt.decode(token);
   const userUuid = payload.sub;
   const deviceUuid = payload.device;
-
   const user = await User.getAsync(userUuid);
   const device = await Device.getAsync(deviceUuid);
 
@@ -25,11 +24,14 @@ export async function loadContextFromHeader(header) {
     throw new Error('User or device not found from token');
   }
 
-  return { user, device };
-}
+  // Throws on error
+  jwt.verify(token, user.get('jwtSecret'), { algorithms: [JWT_DEFAULT_ALGORITHM] });
 
-export function extractVerifiedPayload(accessToken) {
-  return jwt.verify(accessToken, JWT_SECRET, { algorithms: [JWT_DEFAULT_ALGORITHM] });
+  if (payload.sstamp !== user.get('securityStamp')) {
+    throw new Error('You need to login again after recent profile changes');
+  }
+
+  return { user, device };
 }
 
 export function regenerateTokens(user, device) {
@@ -63,7 +65,7 @@ export function regenerateTokens(user, device) {
     amr: ['Application'],
   };
 
-  tokens.accessToken = jwt.sign(payload, JWT_SECRET, { algorithm: JWT_DEFAULT_ALGORITHM });
+  tokens.accessToken = jwt.sign(payload, user.get('jwtSecret'), { algorithm: JWT_DEFAULT_ALGORITHM });
 
   return tokens;
 }
@@ -118,6 +120,22 @@ export function buildCipherDocument(body, user) {
   params.data = data;
 
   return params;
+}
+
+export function buildUserDocument(body) {
+  return {
+    email: body.email.toLowerCase(),
+    passwordHash: body.masterpasswordhash,
+    passwordHint: body.masterpasswordhint,
+    key: body.key,
+    jwtSecret: generateSecret(),
+    culture: 'en-US', // Hard-coded unless supplied from elsewhere
+    premium: true,
+  };
+}
+
+function generateSecret() {
+  return crypto.randomBytes(64).toString('hex');
 }
 
 function generateToken() {

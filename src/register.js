@@ -1,5 +1,6 @@
 import * as utils from './lib/api_utils';
 import { User } from './lib/models';
+import { buildUserDocument } from './lib/bitwarden';
 
 export const handler = async (event, context, callback) => {
   console.log('Registration handler triggered', JSON.stringify(event, null, 2));
@@ -38,7 +39,7 @@ export const handler = async (event, context, callback) => {
       return;
     }
 
-    await User.createAsync(buildUser(body));
+    await User.createAsync(buildUserDocument(body));
 
     callback(null, {
       statusCode: 200,
@@ -48,14 +49,3 @@ export const handler = async (event, context, callback) => {
     callback(null, utils.serverError(e.message, e));
   }
 };
-
-function buildUser(body) {
-  return {
-    email: body.email.toLowerCase(),
-    passwordHash: body.masterpasswordhash,
-    passwordHint: body.masterpasswordhint,
-    key: body.key,
-    culture: 'en-US', // Hard-coded unless supplied from elsewhere
-    premium: true,
-  };
-}

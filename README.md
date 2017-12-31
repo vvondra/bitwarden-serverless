@@ -17,7 +17,8 @@ If you have AWS credentials set up, this should get you a running instance of th
 ```bash
 npm install -g serverless
 npm install
-serverless deploy
+# Feel free to deploy to an AWS region closer to your typical location
+serverless deploy --region us-east-1
 ```
 
 ## Motivation
@@ -34,7 +35,5 @@ The API is tested using blackbox integration tests against a fresh deployment on
 
 ## TODO
 
-- [ ] Secret mgmt for JWT tokens
 - [ ] 2FA
-- [ ] User-friendly logging and response messages
 - [ ] Schema validation on input using Joi
