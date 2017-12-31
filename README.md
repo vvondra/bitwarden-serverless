@@ -21,6 +21,12 @@ npm install
 serverless deploy --region us-east-1
 ```
 
+The deploy command will return a service URL (e.g. `https://abcd01234.execute-api.us-east-1.amazonaws.com/prod`), which you can set up in Bitwarden as your own self-hosted endpoint.
+
+## Enable 2FA
+
+Run `./two_factor.sh`, the script will ask you for the e-mail you want to set up two factor authentication form. Then copy the data URL with the QR code into your web browser and scan it with your authenticator app of choice. Provide one valid token to confirm the setup.
+
 ## Motivation
 
 I really like the idea of bitwarden-ruby and hosting my secrets under my own control. Unfortunately I don't trust my VPSes in terms of availability and crash recovery enough to host all my passwords on them.
