@@ -10,6 +10,13 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
 
 *(Note: This project is not associated with the [Bitwarden](https://bitwarden.com/) project nor 8bit Solutions LLC.)*
 
+## Current status
+
+- [x] Tested with Chrome extension
+- [ ] Tested with Android app
+- [ ] Tested with iOS app
+- [ ] Tested with Web vault
+
 ## Setup
 
 If you have AWS credentials set up, this should get you a running instance of the API. Just plug the AWS Gateway Service endpoint into your Bitwarden settings.
@@ -41,5 +48,4 @@ The API is tested using blackbox integration tests against a fresh deployment on
 
 ## TODO
 
-- [ ] 2FA
 - [ ] Schema validation on input using Joi
