@@ -1,6 +1,5 @@
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
-import * as utils from './lib/api_utils';
 import { User } from './lib/models';
 
 export const setupHandler = async (event, context, callback) => {
