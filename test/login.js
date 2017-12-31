@@ -203,7 +203,10 @@ describe("Login API", function () {
           }
         );
 
-        return response;
+        return new Promise(function(resolve) {
+          // Wait a second so the access token changes
+          setTimeout(() => resolve(response), 1500);
+        });
       }).then(function (loginResponse) {
         refreshToken = loginResponse.body.refresh_token;
         accessToken = loginResponse.body.access_token;
@@ -215,10 +218,7 @@ describe("Login API", function () {
           }
         );
 
-        return new Promise(function(resolve) {
-          // Wait a second so the access token changes
-          setTimeout(() => resolve(response), 1500);
-        });
+        return response;
       }).then(function (refreshResponse) {
         var body = refreshResponse.body;
 
