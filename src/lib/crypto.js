@@ -40,7 +40,7 @@ export class CipherString {
   }
 }
 
-export async function makeKey(password, salt) {
+export async function makeKeyAsync(password, salt) {
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(password, salt, 5000, 256 / 8, 'sha256', (err, derivedKey) => {
       if (err) {
@@ -71,8 +71,8 @@ export function makeEncryptionKey(key) {
   ).toString();
 }
 
-export async function hashPassword(password, salt) {
-  const key = await makeKey(password, salt);
+export async function hashPasswordAsync(password, salt) {
+  const key = await makeKeyAsync(password, salt);
 
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(key, password, 1, 256 / 8, 'sha256', (err, derivedKey) => {
@@ -86,7 +86,7 @@ export async function hashPassword(password, salt) {
   });
 }
 
-export async function encrypt(plaintext, key, macKey) {
+export function encrypt(plaintext, key, macKey) {
   const iv = crypto.randomBytes(16);
 
   const cipher = crypto.createCipheriv('AES-256-CBC', key, iv);

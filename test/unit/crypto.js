@@ -7,27 +7,27 @@ describe('Bitwarden cipher format', function() {
   it('should make a key from a password and salt', async function() {
     const b64 = '2K4YP5Om9r5NpA7FCS4vQX5t+IC4hKYdTJN/C20cz9c=';
 
-    let key = await bitwardenCrypto.makeKey('this is a password', 'nobody@example.com');
+    let key = await bitwardenCrypto.makeKeyAsync('this is a password', 'nobody@example.com');
     expect(key.toString('base64')).to.equal(b64);
 
     // make sure key and salt affect it
-    key = await bitwardenCrypto.makeKey('this is a password', 'nobody2@example.com')
+    key = await bitwardenCrypto.makeKeyAsync('this is a password', 'nobody2@example.com')
     expect(key.toString('base64')).not.to.equal(b64);
 
-    key = await bitwardenCrypto.makeKey('this is A password', 'nobody@example.com')
+    key = await bitwardenCrypto.makeKeyAsync('this is A password', 'nobody@example.com')
     expect(key.toString('base64')).not.to.equal(b64);
   });
 
   it('should make a cipher string from a key', async function() {
     const encryptionKey = bitwardenCrypto.makeEncryptionKey(
-      await bitwardenCrypto.makeKey('this is a password', 'nobody@example.com')
+      await bitwardenCrypto.makeKeyAsync('this is a password', 'nobody@example.com')
     );
 
     expect(encryptionKey).to.match(/^0\.[^|]+|[^|]+$/);
   });
 
   it('should hash a password', async function() {
-    expect(await bitwardenCrypto.hashPassword('secret password', 'user@example.com'))
+    expect(await bitwardenCrypto.hashPasswordAsync('secret password', 'user@example.com'))
       .to.equal('VRlYxg0x41v40mvDNHljqpHcqlIFwQSzegeq+POW1ww=');
   });
 
@@ -50,7 +50,7 @@ describe('Bitwarden cipher format', function() {
   it('should encrypt and decrypt properly with AES-CBC-256', async function() {
     const plaintext = crypto.randomBytes(64);
     const iv = crypto.randomBytes(16);
-    const key = await bitwardenCrypto.makeKey('foo', 'bar');
+    const key = await bitwardenCrypto.makeKeyAsync('foo', 'bar');
     const cipher = crypto.createCipheriv('AES-256-CBC', key, iv);
     const ciphertext = Buffer.concat([
       cipher.update(plaintext, 'utf8'),
@@ -70,9 +70,9 @@ describe('Bitwarden cipher format', function() {
   });
 
   it('should encrypt and decrypt properly with AES-CBC-256 + HMAC', async function() {
-    const key = await bitwardenCrypto.makeKey('password', 'user@example.com');
+    const key = await bitwardenCrypto.makeKeyAsync('password', 'user@example.com');
     const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
-    const ciphertext = await bitwardenCrypto.encrypt(
+    const ciphertext = bitwardenCrypto.encrypt(
       'hi there',
       encryptionkey.slice(0, 32),
       encryptionkey.slice(32, 32)
