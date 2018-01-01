@@ -57,7 +57,7 @@ export async function hashPassword(password, salt) {
   const key = await makeKey(password, salt);
 
   return new Promise((resolve, reject) => {
-    crypto.pbkdf2(key, salt, 1, 256 / 8, 'sha256', (err, derivedKey) => {
+    crypto.pbkdf2(key, password, 1, 256 / 8, 'sha256', (err, derivedKey) => {
       if (err) {
         reject(err);
         return;
