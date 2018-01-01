@@ -60,7 +60,6 @@ describe("Cipher API", function () {
   var email;
 
   before(function() {
-    user = null;
     email = null;
 
     var registrationBody = getRegistrationBody();

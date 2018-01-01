@@ -46,7 +46,6 @@ describe("Sync API", function () {
   var email;
 
   beforeEach(function() {
-    user = null;
     email = null;
 
     var registrationBody = getRegistrationBody();
