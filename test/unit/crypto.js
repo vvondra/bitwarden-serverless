@@ -1,7 +1,7 @@
 // Thanks to bitwarden-ruby for the test cases
-
-import * as bitwardenCrypto from '../../src/lib/crypto';
 import { expect } from 'chai';
+import crypto from 'crypto';
+import * as bitwardenCrypto from '../../src/lib/crypto';
 
 describe('Bitwarden cipher format', function() {
   it('should make a key from a password and salt', async function() {
@@ -47,7 +47,29 @@ describe('Bitwarden cipher format', function() {
     expect(cs.type).to.equal(2);
   });
 
-  it('should encrypt and decrypt properly', async function() {
+  it('should encrypt and decrypt properly with AES-CBC-256', async function() {
+    const plaintext = crypto.randomBytes(64);
+    const iv = crypto.randomBytes(16);
+    const key = await bitwardenCrypto.makeKey('foo', 'bar');
+    const cipher = crypto.createCipheriv('AES-256-CBC', key, iv);
+    const ciphertext = Buffer.concat([
+      cipher.update(plaintext, 'utf8'),
+      cipher.final(),
+    ]);
+    const cipherString = new bitwardenCrypto.CipherString(
+      bitwardenCrypto.TYPE_AESCBC256_B64,
+      iv.toString('base64'),
+      ciphertext.toString('base64'),
+    ).toString();
+
+    expect(bitwardenCrypto.decrypt(
+      cipherString.toString(),
+      key.slice(0, 32),
+      key.slice(32, 32)
+    )).to.equal(plaintext.toString('utf-8'));
+  });
+
+  it('should encrypt and decrypt properly with AES-CBC-256 + HMAC', async function() {
     const key = await bitwardenCrypto.makeKey('password', 'user@example.com');
     const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
     const ciphertext = await bitwardenCrypto.encrypt(
@@ -58,7 +80,6 @@ describe('Bitwarden cipher format', function() {
 
     const cipherstring = bitwardenCrypto.CipherString.fromString(ciphertext.toString())
 
-    const secondKey = await bitwardenCrypto.makeKey('password', 'user@example.com')
     expect(bitwardenCrypto.decrypt(
       cipherstring.toString(),
       encryptionkey.slice(0, 32),
