@@ -34,6 +34,16 @@ The deploy command will return a service URL (e.g. `https://abcd01234.execute-ap
 
 Run `./two_factor.sh`, the script will ask you for the e-mail you want to set up two factor authentication form. Then copy the data URL with the QR code into your web browser and scan it with your authenticator app of choice. Provide one valid token to confirm the setup.
 
+## Run on own domain
+
+By default you will get a generated API gateway URL which is quite long. You can use the stack through a custom CNAME of your choice.
+
+1. Have a domain under your control.
+1. Issue an AWS ACM certificate for that domain in the `us-east-1` region (free). This will require you to add a verification CNAME or confirm a link on an e-mail going to that domain.
+1. Wait some time until the certificate activates (1 hour?)
+1. Go to the API Gateway console and under the Custom Domains section add a new mapping with your domain.
+1. Add the final CNAME in your DNS configuration, the target value will be in the format `<id>.cloudfront.net`
+
 ## Motivation
 
 I really like the idea of bitwarden-ruby and hosting my secrets under my own control. Unfortunately I don't trust my VPSes in terms of availability and crash recovery enough to host all my passwords on them.
