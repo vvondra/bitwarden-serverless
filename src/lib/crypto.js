@@ -53,6 +53,24 @@ export async function makeKey(password, salt) {
   });
 }
 
+export function makeEncryptionKey(key) {
+  const plaintext = crypto.randomBytes(64);
+  const iv = crypto.randomBytes(16);
+
+  const cipher = crypto.createCipheriv('AES-256-CBC', key, iv);
+
+  const ciphertext = Buffer.concat([
+    cipher.update(plaintext, 'utf8'),
+    cipher.final(),
+  ]);
+
+  return new CipherString(
+    TYPE_AESCBC256_B64,
+    iv.toString('base64'),
+    ciphertext.toString('base64'),
+  ).toString();
+}
+
 export async function hashPassword(password, salt) {
   const key = await makeKey(password, salt);
 
@@ -71,7 +89,7 @@ export async function hashPassword(password, salt) {
 export async function encrypt(plaintext, key, macKey) {
   const iv = crypto.randomBytes(16);
 
-  const cipher = crypto.createCipheriv('AES-256-CB', key, iv);
+  const cipher = crypto.createCipheriv('AES-256-CBC', key, iv);
 
   const ciphertext = Buffer.concat([
     cipher.update(plaintext, 'utf8'),
@@ -89,4 +107,51 @@ export async function encrypt(plaintext, key, macKey) {
     ciphertext.toString('base64'),
     mac.toString('base64'),
   );
+}
+
+export function decrypt(rawString, key, macKey) {
+  const cipherString = CipherString.fromString(rawString);
+  const iv = Buffer.from(cipherString.iv, 'base64');
+  const ciphertext = Buffer.from(cipherString.ciphertext, 'base64');
+  const mac = cipherString.mac ? Buffer.from(cipherString.mac, 'base64') : null;
+
+  switch (cipherString.type) {
+    case TYPE_AESCBC256_B64: {
+      const cipher = crypto.createDecipheriv('AES-256-CBC', key, iv);
+      return Buffer.concat([
+        cipher.update(ciphertext),
+        cipher.final(),
+      ]).toString('utf-8');
+    }
+    case TYPE_AESCBC256_HMACSHA256_B64: {
+      const cipherMac = crypto.createHmac('sha256', macKey)
+        .update(iv)
+        .update(ciphertext)
+        .digest();
+
+      if (!macsEqual(macKey, mac, cipherMac)) {
+        throw new Error('Invalid cipher mac');
+      }
+
+      const cipher = crypto.createDecipheriv('AES-256-CBC', key, iv);
+      return Buffer.concat([
+        cipher.update(ciphertext),
+        cipher.final(),
+      ]).toString('utf-8');
+    }
+    default:
+      throw new Error('Unimplemented cipher for decryption: ' + cipherString.type);
+  }
+}
+
+export function macsEqual(macKey, left, right) {
+  const leftMac = crypto.createHmac('sha256', macKey)
+    .update(left)
+    .digest('hex');
+
+  const rightMac = crypto.createHmac('sha256', macKey)
+    .update(right)
+    .digest('hex');
+
+  return leftMac === rightMac;
 }

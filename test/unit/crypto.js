@@ -17,15 +17,14 @@ describe('Bitwarden cipher format', function() {
     key = await bitwardenCrypto.makeKey('this is A password', 'nobody@example.com')
     expect(key.toString('base64')).not.to.equal(b64);
   });
-/*
-  it('should make a cipher string from a key', function() {
-    cs = Bitwarden.makeEncKey(
-      Bitwarden.makeKey('this is a password', 'nobody@example.com')
-    )
 
-    cs.must_match(/^0\.[^|]+|[^|]+$/)
+  it('should make a cipher string from a key', async function() {
+    const encryptionKey = bitwardenCrypto.makeEncryptionKey(
+      await bitwardenCrypto.makeKey('this is a password', 'nobody@example.com')
+    );
+
+    expect(encryptionKey).to.match(/^0\.[^|]+|[^|]+$/);
   });
-*/
 
   it('should hash a password', async function() {
     expect(await bitwardenCrypto.hashPassword('secret password', 'user@example.com'))
@@ -47,20 +46,27 @@ describe('Bitwarden cipher format', function() {
     const cs = bitwardenCrypto.CipherString.fromString('2.ftF0nH3fGtuqVckLZuHGjg==|u0VRhH24uUlVlTZd/uD1lA==|XhBhBGe7or/bXzJRFWLUkFYqauUgxksCrRzNmJyigfw=');
     expect(cs.type).to.equal(2);
   });
-/*
-  it('should encrypt and decrypt properly', function() {
-    const ik = Bitwarden.makeKey('password', 'user@example.com')
-    k = Bitwarden.makeEncKey(ik)
-    j = Bitwarden.encrypt('hi there', k[0, 32], k[32, 32])
 
-    cs = Bitwarden::CipherString.parse(j)
+  it('should encrypt and decrypt properly', async function() {
+    const key = await bitwardenCrypto.makeKey('password', 'user@example.com');
+    const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
+    const ciphertext = await bitwardenCrypto.encrypt(
+      'hi there',
+      encryptionkey.slice(0, 32),
+      encryptionkey.slice(32, 32)
+    );
 
-    ik = Bitwarden.makeKey('password', 'user@example.com')
-    Bitwarden.decrypt(cs.to_s, k[0, 32], k[32, 32]).must_equal 'hi there'
+    const cipherstring = bitwardenCrypto.CipherString.fromString(ciphertext.toString())
+
+    const secondKey = await bitwardenCrypto.makeKey('password', 'user@example.com')
+    expect(bitwardenCrypto.decrypt(
+      cipherstring.toString(),
+      encryptionkey.slice(0, 32),
+      encryptionkey.slice(32, 32)
+    )).to.equal('hi there');
   });
 
   it('should test mac equality', function() {
-    Bitwarden.macsEqual('asdfasdfasdf', 'hi', 'hi').must_equal true
+    expect(bitwardenCrypto.macsEqual('asdfasdfasdf', 'hi', 'hi')).to.be.truthy;
   });
-*/
 });
