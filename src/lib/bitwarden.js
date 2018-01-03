@@ -6,6 +6,10 @@ import { User, Device } from './models';
 
 const JWT_DEFAULT_ALGORITHM = 'HS256';
 
+export const TYPE_LOGIN = 1;
+export const TYPE_NOTE = 2;
+export const TYPE_CARD = 3;
+
 export const DEFAULT_VALIDITY = 60 * 60;
 
 export async function loadContextFromHeader(header) {
@@ -75,10 +79,6 @@ export function hashesMatch(hashA, hashB) {
 }
 
 export function buildCipherDocument(body, user) {
-  const TYPE_LOGIN = 1;
-  // const TYPE_NOTE = 2;
-  const TYPE_CARD = 3;
-
   const params = {
     userUuid: user.get('uuid'),
     organizationUuid: body.organizationid,

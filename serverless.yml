@@ -29,6 +29,15 @@ provider:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CIPHERS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.FOLDERS_TABLE}"
+    - Effect: Allow
+      Action:
+        - sqs:ReceiveMessage
+        - sqs:SendMessage
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DEVICES_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CIPHERS_TABLE}"
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.FOLDERS_TABLE}"
 
 functions:
   login:
@@ -98,6 +107,10 @@ functions:
     handler: src/two_factor.setupHandler
   two_factor_complete:
     handler: src/two_factor.completeHandler
+  import_bitwarden:
+    handler: src/import.bitwardenHandler
+    timeout: 180
+    memorySize: 1024
   default:
     handler: src/default.handler
     events:
@@ -168,3 +181,7 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+    ImportTaskQueeu:
+      Type: AWS::SQS::Queue
+      Properties:
+        VisibilityTimeout: 60

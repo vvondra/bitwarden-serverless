@@ -62,11 +62,8 @@ describe('Bitwarden cipher format', function() {
       ciphertext.toString('base64'),
     ).toString();
 
-    expect(bitwardenCrypto.decrypt(
-      cipherString.toString(),
-      key.slice(0, 32),
-      key.slice(32, 32)
-    )).to.equal(plaintext.toString('utf-8'));
+    expect(bitwardenCrypto.decrypt(cipherString.toString(), key))
+      .to.equal(plaintext.toString('utf-8'));
   });
 
   it('should encrypt and decrypt properly with AES-CBC-256 + HMAC', async function() {
@@ -74,20 +71,26 @@ describe('Bitwarden cipher format', function() {
     const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
     const ciphertext = bitwardenCrypto.encrypt(
       'hi there',
-      encryptionkey.slice(0, 32),
-      encryptionkey.slice(32, 32)
+      encryptionkey
     );
 
     const cipherstring = bitwardenCrypto.CipherString.fromString(ciphertext.toString())
 
-    expect(bitwardenCrypto.decrypt(
-      cipherstring.toString(),
-      encryptionkey.slice(0, 32),
-      encryptionkey.slice(32, 32)
-    )).to.equal('hi there');
+    expect(bitwardenCrypto.decrypt(cipherstring.toString(), encryptionkey))
+      .to.equal('hi there');
   });
 
   it('should test mac equality', function() {
     expect(bitwardenCrypto.macsEqual('asdfasdfasdf', 'hi', 'hi')).to.be.truthy;
+  });
+
+  it('should encrypt and decrypt with encryption key encrypted by master key', async function() {
+    const data = 'hi hello';
+    const key = await bitwardenCrypto.makeKeyAsync('password', 'user@example.com');
+    const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
+
+    const cipherstring = bitwardenCrypto.encryptWithMasterPasswordKey(data, encryptionkey, key);
+    expect(bitwardenCrypto.decryptWithMasterPasswordKey(cipherstring.toString(), encryptionkey, key)).to.equal(data);
+
   });
 });
