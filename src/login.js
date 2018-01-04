@@ -23,8 +23,6 @@ export const handler = async (event, context, callback) => {
         if ([
           'client_id',
           'grant_type',
-          'devicename',
-          'devicetype',
           'password',
           'scope',
           'username',
@@ -50,12 +48,12 @@ export const handler = async (event, context, callback) => {
           .Items;
 
         if (!user) {
-          callback(null, utils.validationError('Unknown e-mail/username'));
+          callback(null, utils.validationError('Invalid username or password'));
           return;
         }
 
         if (!hashesMatch(user.get('passwordHash'), body.password)) {
-          callback(null, utils.validationError('Password doesn\'t match'));
+          callback(null, utils.validationError('Invalid username or password'));
           return;
         }
 
@@ -105,10 +103,13 @@ export const handler = async (event, context, callback) => {
         if (Number.isNaN(deviceType)) {
           deviceType = body.devicetype;
         }
-        device.set({
-          type: deviceType,
-          name: body.devicename,
-        });
+        if (body.devicename && deviceType) {
+          device.set({
+            // Browser extension sends body, web and mobile send header
+            type: event.headers['Device-Type'] || body.devicetype,
+            name: body.devicename,
+          });
+        }
 
         if (body.devicepushtoken) {
           device.set({ pushToken: body.devicepushtoken });
@@ -149,12 +150,16 @@ export const handler = async (event, context, callback) => {
 
     callback(null, {
       statusCode: 200,
+      headers: {
+         'access-control-allow-origin':'*',
+      },
       body: JSON.stringify({
         access_token: tokens.accessToken,
         expires_in: DEFAULT_VALIDITY,
         token_type: 'Bearer',
         refresh_token: tokens.refreshToken,
         Key: user.get('key'),
+        PrivateKey: user.get('privateKey'),
       }),
     });
   } catch (e) {
