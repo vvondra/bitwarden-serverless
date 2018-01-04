@@ -36,8 +36,29 @@ functions:
     events:
       - http:
           method: post
-          cors: true
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - Accept
+              - Device-type
+            allowMethods: "GET, POST, OPTIONS, PUT, DELETE"
           path: identity/connect/token
+  keys:
+    handler: src/keys.handler
+    events:
+      - http:
+          method: post
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - Authorization
+              - Accept
+              - Device-type
+            allowMethods: "GET, POST, OPTIONS, PUT, DELETE"
+          path: api/accounts/keys
   register:
     handler: src/register.handler
     events:
