@@ -1,8 +1,6 @@
 import querystring from 'querystring';
-import speakeasy from 'speakeasy';
 import * as utils from './lib/api_utils';
-import { User, Device } from './lib/models';
-import { regenerateTokens, hashesMatch, DEFAULT_VALIDITY } from './lib/bitwarden';
+import { regenerateTokens, loadContextFromHeader, DEFAULT_VALIDITY } from './lib/bitwarden';
 
 export const handler = async (event, context, callback) => {
   console.log('Keys handler triggered', JSON.stringify(event, null, 2));
@@ -11,32 +9,44 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const body = utils.normalizeBody(querystring.parse(event.body));
+  let body;
+  const contentType = event.headers['Content-Type'].split(';')[0];
+  if (contentType === 'application/json') {
+    body = utils.normalizeBody(JSON.parse(event.body));
+  } else {
+    body = utils.normalizeBody(querystring.parse(event.body));
+  }
 
   let user;
+  let device;
   try {
-    ({ user } = await loadContextFromHeader(event.headers.Authorization));
+    ({ user, device } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
     callback(null, utils.validationError('User not found: ' + e.message));
     return;
   }
 
-  var re = new RegExp("/^2\..+\|.+/");
+  const re = /^2\..+\|.+/;
   if (!re.test(body.encryptedprivatekey)) {
     callback(null, utils.validationError('Invalid key'));
     return;
   }
 
-  user['privateKey'] = body.encryptedprivatekey
-  user['publicKey'] = body.publicKey
+  user.set({ privateKey: body.encryptedprivatekey });
+  user.set({ publicKey: body.publickey });
 
   const tokens = regenerateTokens(user, device);
 
-  try{
+  device.set({ refreshToken: tokens.refreshToken });
+
+  device = await device.updateAsync();
+  await user.updateAsync();
+
+  try {
     callback(null, {
       statusCode: 200,
       headers: {
-         'Access-Control-Allow-Origin':'*'
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
         access_token: tokens.accessToken,
@@ -54,8 +64,8 @@ export const handler = async (event, context, callback) => {
         TwoFactorEnabled: user.get('totpSecret'),
         PrivateKey: user.get('privateKey'),
         SecurityStamp: user.get('securityStamp'),
-        Organizations: "[]",
-        Object : "profile",
+        Organizations: '[]',
+        Object: 'profile',
       }),
     });
   } catch (e) {

@@ -13,6 +13,7 @@ export const handler = async (event, context, callback) => {
 
   const body = utils.normalizeBody(querystring.parse(event.body));
 
+  let eventHeaders;
   let device;
   let deviceType;
   let user;
@@ -96,13 +97,12 @@ export const handler = async (event, context, callback) => {
 
         // Browser extension sends body, web and mobile send header.
         // iOS sends lower case header with string value.
-        deviceType = parseInt(event.headers['Device-Type'], 10);
-        if (Number.isNaN(deviceType)) {
+        eventHeaders = utils.normalizeBody(event.headers);
+        deviceType = body.devicetype;
+        if (!Number.isNaN(eventHeaders['device-type'])) {
           deviceType = parseInt(event.headers['device-type'], 10);
         }
-        if (Number.isNaN(deviceType)) {
-          deviceType = body.devicetype;
-        }
+
         if (body.devicename && deviceType) {
           device.set({
             // Browser extension sends body, web and mobile send header
@@ -151,7 +151,7 @@ export const handler = async (event, context, callback) => {
     callback(null, {
       statusCode: 200,
       headers: {
-         'access-control-allow-origin':'*',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
         access_token: tokens.accessToken,
