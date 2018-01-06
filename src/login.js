@@ -141,7 +141,7 @@ export const handler = async (event, context, callback) => {
     callback(null, {
       statusCode: 200,
       headers: {
-         'access-control-allow-origin':'*',
+        'Access-Control-Allow-Origin': '*',
       },
       body: JSON.stringify({
         access_token: tokens.accessToken,

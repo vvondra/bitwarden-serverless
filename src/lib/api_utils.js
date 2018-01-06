@@ -12,7 +12,7 @@ export function validationError(message) {
   return {
     statusCode: 400,
     headers: {
-       'access-control-allow-origin':'*',
+      'access-control-allow-origin': '*',
     },
     body: JSON.stringify({
       ValidationErrors: {
@@ -30,7 +30,7 @@ export function serverError(message, error) {
   return {
     statusCode: 500,
     headers: {
-       'access-control-allow-origin':'*',
+      'access-control-allow-origin': '*',
     },
     body: JSON.stringify({
       Message: message,
