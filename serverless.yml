@@ -62,6 +62,20 @@ functions:
           method: post
           <<: *default_cors
           path: api/accounts/register
+  profile:
+    handler: src/profile.handler
+    events:
+      - http:
+          method: get
+          <<: *default_cors
+          path: api/accounts/profile
+  password:
+    handler: src/password.handler
+    events:
+      - http:
+          method: post
+          <<: *default_cors
+          path: api/accounts/password
   sync:
     handler: src/sync.handler
     events:
@@ -69,6 +83,13 @@ functions:
           method: get
           <<: *default_cors
           path: api/sync
+  cipher_get:
+    handler: src/ciphers.getHandler
+    events:
+      - http:
+          method: get
+          <<: *default_cors
+          path: api/ciphers
   cipher_post:
     handler: src/ciphers.postHandler
     events:
@@ -90,6 +111,13 @@ functions:
           method: delete
           <<: *default_cors
           path: api/ciphers/{uuid}
+  folder_get:
+    handler: src/folders.getHandler
+    events:
+      - http:
+          method: get
+          <<: *default_cors
+          path: api/folders
   folder_post:
     handler: src/folders.postHandler
     events:
@@ -111,6 +139,13 @@ functions:
           method: delete
           <<: *default_cors
           path: api/folders/{uuid}
+  collections:
+    handler: src/collections.handler
+    events:
+      - http:
+          method: get
+          <<: *default_cors
+          path: api/collections
   two_factor_setup:
     handler: src/two_factor.setupHandler
   two_factor_complete:
