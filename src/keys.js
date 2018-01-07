@@ -9,7 +9,7 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const body = utils.normalizeBody(querystring.parse(event.body));
+  const body = utils.normalizeBody(JSON.parse(event.body));
 
   let user;
   let device;
