@@ -112,3 +112,51 @@ export const deleteHandler = async (event, context, callback) => {
     callback(null, utils.validationError(e.toString()));
   }
 };
+
+export const getHandler = async (event, context, callback) => {
+  console.log('Get handler triggered', JSON.stringify(event, null, 2));
+
+  let user;
+  try {
+    ({ user } = await loadContextFromHeader(event.headers.Authorization));
+  } catch (e) {
+    callback(null, utils.validationError('User not found'));
+  }
+
+  let ciphers;
+  try {
+    if (event.pathParameters) {
+      const cipherUuid = event.pathParameters.uuid;
+      if (!cipherUuid) {
+        callback(null, utils.validationError('Missing vault item ID'));
+      }
+      ciphers = await Cipher.getAsync(user.get('uuid'), cipherUuid);
+
+      if (!ciphers) {
+        callback(null, utils.validationError('Unknown vault item'));
+        return;
+      }
+    } else {
+      ciphers = (await Cipher.query(user.get('uuid')).execAsync()).Items;
+    }
+  } catch (e) {
+    callback(null, utils.serverError('Server error loading vault items', e));
+    return;
+  }
+
+  const response = {
+    Data: ciphers.map(mapCipher),
+    Object: 'list',
+  };
+  try {
+    callback(null, {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify(response),
+    });
+  } catch (e) {
+    callback(null, utils.validationError(e.toString()));
+  }
+};
