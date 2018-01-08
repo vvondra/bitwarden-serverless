@@ -36,7 +36,7 @@ Run `./two_factor.sh`, the script will ask you for the e-mail you want to set up
 
 ## Import existing data
 
-### Bitwarden
+### Bitwarden
 
 The import script will interactively ask for your master password. This is needed since the data in the CSV must be encrypted and some data like existing folders must be decrypted.
 
@@ -44,7 +44,7 @@ The import script will interactively ask for your master password. This is neede
 ./import.sh -e user@example.com -f export.csv -p bitwarden
 ```
 
-### Lastpass
+### Lastpass
 
 TBD
 
