@@ -86,7 +86,16 @@ export async function hashPasswordAsync(password, salt) {
   });
 }
 
-export function encrypt(plaintext, key, macKey) {
+export function encryptWithMasterPasswordKey(data, userKey, masterKey) {
+  // Decrypt the encrypted key stored on the user table to get the user key
+  const encKey = Buffer.from(decrypt(userKey, masterKey), 'utf-8');
+
+  return encrypt(data.toString(), encKey);
+}
+
+export function encrypt(plaintext, mergedKey) {
+  const key = mergedKey.slice(0, 32);
+  const macKey = mergedKey.slice(32, 64);
   const iv = crypto.randomBytes(16);
 
   const cipher = crypto.createCipheriv('AES-256-CBC', key, iv);
@@ -109,7 +118,16 @@ export function encrypt(plaintext, key, macKey) {
   );
 }
 
-export function decrypt(rawString, key, macKey) {
+export function decryptWithMasterPasswordKey(data, userKey, masterKey) {
+  // Decrypt the encrypted key stored on the user table to get the user key
+  const encKey = decrypt(userKey, masterKey);
+
+  return decrypt(data.toString(), encKey).toString('utf-8');
+}
+
+export function decrypt(rawString, mergedKey) {
+  const key = mergedKey.slice(0, 32);
+  const macKey = mergedKey.slice(32, 64);
   const cipherString = CipherString.fromString(rawString);
   const iv = Buffer.from(cipherString.iv, 'base64');
   const ciphertext = Buffer.from(cipherString.ciphertext, 'base64');
@@ -121,7 +139,7 @@ export function decrypt(rawString, key, macKey) {
       return Buffer.concat([
         cipher.update(ciphertext),
         cipher.final(),
-      ]).toString('utf-8');
+      ]);
     }
     case TYPE_AESCBC256_HMACSHA256_B64: {
       const cipherMac = crypto.createHmac('sha256', macKey)
@@ -137,7 +155,7 @@ export function decrypt(rawString, key, macKey) {
       return Buffer.concat([
         cipher.update(ciphertext),
         cipher.final(),
-      ]).toString('utf-8');
+      ]);
     }
     default:
       throw new Error('Unimplemented cipher for decryption: ' + cipherString.type);

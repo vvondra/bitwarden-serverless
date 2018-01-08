@@ -62,11 +62,8 @@ describe('Bitwarden cipher format', function() {
       ciphertext.toString('base64'),
     ).toString();
 
-    expect(bitwardenCrypto.decrypt(
-      cipherString.toString(),
-      key.slice(0, 32),
-      key.slice(32, 32)
-    )).to.equal(plaintext.toString('utf-8'));
+    expect(bitwardenCrypto.decrypt(cipherString.toString(), key).toString('utf-8'))
+      .to.equal(plaintext.toString('utf-8'));
   });
 
   it('should encrypt and decrypt properly with AES-CBC-256 + HMAC', async function() {
@@ -74,20 +71,35 @@ describe('Bitwarden cipher format', function() {
     const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
     const ciphertext = bitwardenCrypto.encrypt(
       'hi there',
-      encryptionkey.slice(0, 32),
-      encryptionkey.slice(32, 32)
+      encryptionkey
     );
 
     const cipherstring = bitwardenCrypto.CipherString.fromString(ciphertext.toString())
 
-    expect(bitwardenCrypto.decrypt(
-      cipherstring.toString(),
-      encryptionkey.slice(0, 32),
-      encryptionkey.slice(32, 32)
-    )).to.equal('hi there');
+    expect(bitwardenCrypto.decrypt(cipherstring.toString(), encryptionkey).toString('utf-8'))
+      .to.equal('hi there');
   });
 
   it('should test mac equality', function() {
     expect(bitwardenCrypto.macsEqual('asdfasdfasdf', 'hi', 'hi')).to.be.truthy;
+  });
+
+  it('should encrypt and decrypt with encryption key encrypted by master key', async function() {
+    const data = 'hi hello';
+    const key = await bitwardenCrypto.makeKeyAsync('password', 'user@example.com');
+    const encryptionkey = bitwardenCrypto.makeEncryptionKey(key);
+
+    const cipherstring = bitwardenCrypto.encryptWithMasterPasswordKey(data, encryptionkey, key);
+    expect(bitwardenCrypto.decryptWithMasterPasswordKey(cipherstring.toString(), encryptionkey, key)).to.equal(data);
+
+  });
+
+  it('should decrypt data enciphered by the web extension', async function() {
+    const cipherstring = '2.suREeHFnBh8h7sl7O7nI9Q==|y6AxZmX+tHkp5yPBEW3r4A==|a/cQ3u8/uln+TrYo+9nu8JstQJ3EqTcxBvH/y32sQz8=';
+    const userKey = '0.h1HHLDCl9buG9wwP5Sul4g==|RJJchodNEdivYf9O369rJCX80tNnZlkccNvbd9frLhcPqBT1OOHWFhENpC7DcWfzf7PW+Cb1xmbRNlICYuxccz67kHV+SalbCO7Fq6JHcCE=';
+
+    const key = await bitwardenCrypto.makeKeyAsync('importer', 'import2@ameeck.net');
+
+    expect(bitwardenCrypto.decryptWithMasterPasswordKey(cipherstring, userKey, key)).to.equal('sloška');
   });
 });
