@@ -34,6 +34,20 @@ The deploy command will return a service URL (e.g. `https://abcd01234.execute-ap
 
 Run `./two_factor.sh`, the script will ask you for the e-mail you want to set up two factor authentication form. Then copy the data URL with the QR code into your web browser and scan it with your authenticator app of choice. Provide one valid token to confirm the setup.
 
+## Import existing data
+
+### Bitwarden
+
+The import script will interactively ask for your master password. This is needed since the data in the CSV must be encrypted and some data like existing folders must be decrypted.
+
+```bash
+./import.sh -e user@example.com -f export.csv -p bitwarden
+```
+
+### Lastpass
+
+TBD
+
 ## Run on own domain
 
 By default you will get a generated API gateway URL which is quite long. You can use the stack through a custom CNAME of your choice.
