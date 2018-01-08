@@ -10,6 +10,17 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
 
 *(Note: This project is not associated with the [Bitwarden](https://bitwarden.com/) project nor 8bit Solutions LLC.)*
 
+  * [Current status](#current-status)
+  * [Setup](#setup)
+  * [Enable 2FA](#enable-2fa)
+  * [Import existing data](#import-existing-data)
+    + [Bitwarden](#bitwarden)
+    + [Lastpass](#lastpass)
+  * [Run on own domain](#run-on-own-domain)
+  * [Motivation](#motivation)
+  * [Development](#development)
+  * [TODO](#todo)
+
 ## Current status
 
 - [x] Tested with Chrome extension
