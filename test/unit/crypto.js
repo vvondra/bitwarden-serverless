@@ -62,7 +62,7 @@ describe('Bitwarden cipher format', function() {
       ciphertext.toString('base64'),
     ).toString();
 
-    expect(bitwardenCrypto.decrypt(cipherString.toString(), key))
+    expect(bitwardenCrypto.decrypt(cipherString.toString(), key).toString('utf-8'))
       .to.equal(plaintext.toString('utf-8'));
   });
 
@@ -76,7 +76,7 @@ describe('Bitwarden cipher format', function() {
 
     const cipherstring = bitwardenCrypto.CipherString.fromString(ciphertext.toString())
 
-    expect(bitwardenCrypto.decrypt(cipherstring.toString(), encryptionkey))
+    expect(bitwardenCrypto.decrypt(cipherstring.toString(), encryptionkey).toString('utf-8'))
       .to.equal('hi there');
   });
 
@@ -92,5 +92,14 @@ describe('Bitwarden cipher format', function() {
     const cipherstring = bitwardenCrypto.encryptWithMasterPasswordKey(data, encryptionkey, key);
     expect(bitwardenCrypto.decryptWithMasterPasswordKey(cipherstring.toString(), encryptionkey, key)).to.equal(data);
 
+  });
+
+  it('should decrypt data enciphered by the web extension', async function() {
+    const cipherstring = '2.suREeHFnBh8h7sl7O7nI9Q==|y6AxZmX+tHkp5yPBEW3r4A==|a/cQ3u8/uln+TrYo+9nu8JstQJ3EqTcxBvH/y32sQz8=';
+    const userKey = '0.h1HHLDCl9buG9wwP5Sul4g==|RJJchodNEdivYf9O369rJCX80tNnZlkccNvbd9frLhcPqBT1OOHWFhENpC7DcWfzf7PW+Cb1xmbRNlICYuxccz67kHV+SalbCO7Fq6JHcCE=';
+
+    const key = await bitwardenCrypto.makeKeyAsync('importer', 'import2@ameeck.net');
+
+    expect(bitwardenCrypto.decryptWithMasterPasswordKey(cipherstring, userKey, key)).to.equal('sloška');
   });
 });

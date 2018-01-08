@@ -120,9 +120,9 @@ export function encrypt(plaintext, mergedKey) {
 
 export function decryptWithMasterPasswordKey(data, userKey, masterKey) {
   // Decrypt the encrypted key stored on the user table to get the user key
-  const encKey = Buffer.from(decrypt(userKey, masterKey), 'utf-8');
+  const encKey = decrypt(userKey, masterKey);
 
-  return decrypt(data.toString(), encKey);
+  return decrypt(data.toString(), encKey).toString('utf-8');
 }
 
 export function decrypt(rawString, mergedKey) {
@@ -139,7 +139,7 @@ export function decrypt(rawString, mergedKey) {
       return Buffer.concat([
         cipher.update(ciphertext),
         cipher.final(),
-      ]).toString('utf-8');
+      ]);
     }
     case TYPE_AESCBC256_HMACSHA256_B64: {
       const cipherMac = crypto.createHmac('sha256', macKey)
@@ -155,7 +155,7 @@ export function decrypt(rawString, mergedKey) {
       return Buffer.concat([
         cipher.update(ciphertext),
         cipher.final(),
-      ]).toString('utf-8');
+      ]);
     }
     default:
       throw new Error('Unimplemented cipher for decryption: ' + cipherString.type);

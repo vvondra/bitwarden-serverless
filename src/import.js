@@ -55,10 +55,12 @@ export const bitwardenHandler = async (event, context, callback) => {
         return acc;
       }, {});
 
+    console.log('Already known folders', folders);
+
     const savePromises = [];
 
     fastcsv.fromString(event.csv, { headers: true })
-      .on('data', (row) => {
+      .on('data', async (row) => {
         if (!row.name) {
           return;
         }
@@ -69,14 +71,29 @@ export const bitwardenHandler = async (event, context, callback) => {
           favorite: parseInt(row.favorite, 10) === 1,
         };
 
-        if (folders[row.folder]) {
-          cipher.folderUuid = folders[row.folder];
-        }
-
-        const encrypt = value =>
-          bitwardenCrypto
+        const encrypt = (value) => {
+          const s = bitwardenCrypto
             .encryptWithMasterPasswordKey(value, user.get('key'), masterKey)
             .toString();
+
+          return s;
+        };
+
+        if (row.folder) {
+          if (folders[row.folder]) {
+            cipher.folderUuid = folders[row.folder];
+          } else {
+            try {
+              // Create folder if missing
+              const folder = await Folder.createAsync({ userUuid: user.get('uuid'), name: encrypt(row.folder) });
+              cipher.folderUuid = folder.get('uuid');
+              folders[row.folder] = folder.get('uuid');
+            } catch (e) {
+              console.error('Error creating folder', e);
+              output.push('ERROR creating folder ' + row.folder);
+            }
+          }
+        }
 
         switch (row.type) {
           case 'login':
@@ -118,10 +135,10 @@ export const bitwardenHandler = async (event, context, callback) => {
       })
       .on('error', (e) => {
         console.error('Error parsing CSV row', e);
+        output.push('ERROR parsing import row:' + e);
       })
       .on('end', async () => {
         console.log('Waiting for imports to finish');
-
         let failedPromises = savePromises;
         while (failedPromises.length > 0) {
           failedPromises = await Promise.all(failedPromises) // eslint-disable-line
@@ -135,16 +152,14 @@ export const bitwardenHandler = async (event, context, callback) => {
 
                   const { cipher } = res;
                   const retryPromise = new Promise((resolve) => {
-                    setTimeout(resolve, Math.floor(Math.random() * 30));
+                    // Delay by 1-30s to get throughput lower
+                    setTimeout(resolve, Math.floor(Math.random() * 30000));
                   }).then(() => {
                     Cipher.createAsync(cipher)
                       .then(result => ({ success: true, result, cipher }))
                       .catch(error => ({ success: false, error, cipher }));
                   });
                   toRetry.push(retryPromise);
-                } else {
-                  output.push(res.result);
-                  console.log(res.result);
                 }
               }
 
@@ -158,7 +173,7 @@ export const bitwardenHandler = async (event, context, callback) => {
           console.log('Retrying ' + failedPromises + ' calls');
         }
 
-        callback(null, output.map(JSON.stringify).join('\n'));
+        callback(null, output);
       });
   } catch (e) {
     console.error('Exception processing import data', e);
