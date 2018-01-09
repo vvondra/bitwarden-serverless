@@ -1,5 +1,5 @@
 import fastcsv from 'fast-csv';
-import { User, Folder, Cipher } from './lib/models';
+import { User, Cipher } from './lib/models';
 import * as bitwardenCrypto from './lib/crypto';
 import * as bitwarden from './lib/bitwarden';
 import { loadFolders } from './lib/import';
@@ -50,7 +50,7 @@ export const bitwardenHandler = async (event, context, callback) => {
   try {
     const masterKey = await bitwardenCrypto.makeKeyAsync(event.masterPassword, user.get('email'));
 
-    const folders = await loadFolders(user, masterKey);
+    const folders = await loadFolders(user, masterKey, event.csv, row => row.folder);
     console.log('Already known folders', folders);
 
     const savePromises = [];
@@ -78,16 +78,6 @@ export const bitwardenHandler = async (event, context, callback) => {
         if (row.folder) {
           if (folders[row.folder]) {
             cipher.folderUuid = folders[row.folder];
-          } else {
-            try {
-              // Create folder if missing
-              const folder = await Folder.createAsync({ userUuid: user.get('uuid'), name: encrypt(row.folder) });
-              cipher.folderUuid = folder.get('uuid');
-              folders[row.folder] = folder.get('uuid');
-            } catch (e) {
-              console.error('Error creating folder', e);
-              output.push('ERROR creating folder ' + row.folder);
-            }
           }
         }
 
@@ -194,7 +184,7 @@ export const lastpassHandler = async (event, context, callback) => {
   try {
     const masterKey = await bitwardenCrypto.makeKeyAsync(event.masterPassword, user.get('email'));
 
-    const folders = await loadFolders(user, masterKey);
+    const folders = await loadFolders(user, masterKey, event.csv, row => row.grouping);
     console.log('Already known folders', folders);
 
     const savePromises = [];
@@ -222,16 +212,6 @@ export const lastpassHandler = async (event, context, callback) => {
         if (row.grouping) {
           if (folders[row.grouping]) {
             cipher.folderUuid = folders[row.grouping];
-          } else {
-            try {
-              // Create folder if missing
-              const folder = await Folder.createAsync({ userUuid: user.get('uuid'), name: encrypt(row.grouping) });
-              cipher.folderUuid = folder.get('uuid');
-              folders[row.grouping] = folder.get('uuid');
-            } catch (e) {
-              console.error('Error creating folder', e);
-              output.push('ERROR creating folder ' + row.grouping);
-            }
           }
         }
 
