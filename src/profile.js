@@ -2,13 +2,7 @@ import * as utils from './lib/api_utils';
 import { regenerateTokens, loadContextFromHeader } from './lib/bitwarden';
 
 export const handler = async (event, context, callback) => {
-  console.log('Keys handler triggered', JSON.stringify(event, null, 2));
-  if (!event.body) {
-    callback(null, utils.validationError('Missing request body'));
-    return;
-  }
-
-  const body = utils.normalizeBody(JSON.parse(event.body));
+  console.log('Profile handler triggered', JSON.stringify(event, null, 2));
 
   let user;
   let device;
@@ -19,21 +13,11 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const re = /^2\..+\|.+/;
-  if (!re.test(body.encryptedprivatekey)) {
-    callback(null, utils.validationError('Invalid key'));
-    return;
-  }
-
-  user.set({ privateKey: body.encryptedprivatekey });
-  user.set({ publicKey: body.publickey });
-
   const tokens = regenerateTokens(user, device);
 
   device.set({ refreshToken: tokens.refreshToken });
 
   device = await device.updateAsync();
-  await user.updateAsync();
 
   try {
     callback(null, {

@@ -115,3 +115,39 @@ export const deleteHandler = async (event, context, callback) => {
     callback(null, utils.validationError(e.toString()));
   }
 };
+
+export const getHandler = async (event, context, callback) => {
+  console.log('Get delete handler triggered', JSON.stringify(event, null, 2));
+
+  let user;
+  try {
+    ({ user } = await loadContextFromHeader(event.headers.Authorization));
+  } catch (e) {
+    callback(null, utils.validationError('User not found'));
+  }
+
+  let folders;
+  try {
+    // TODO await in parallel
+    folders = (await Folder.query(user.get('uuid')).execAsync()).Items;
+  } catch (e) {
+    callback(null, utils.serverError('Server error loading vault items', e));
+    return;
+  }
+
+  const response = {
+    Data: folders.map(mapFolder),
+    Object: 'list',
+  };
+  try {
+    callback(null, {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify(response),
+    });
+  } catch (e) {
+    callback(null, utils.validationError(e.toString()));
+  }
+};

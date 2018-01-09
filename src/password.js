@@ -1,8 +1,9 @@
 import * as utils from './lib/api_utils';
-import { regenerateTokens, loadContextFromHeader } from './lib/bitwarden';
+import * as bitwardenCrypto from './lib/crypto';
+import { regenerateTokens, loadContextFromHeader, hashesMatch } from './lib/bitwarden';
 
 export const handler = async (event, context, callback) => {
-  console.log('Keys handler triggered', JSON.stringify(event, null, 2));
+  console.log('Password handler triggered', JSON.stringify(event, null, 2));
   if (!event.body) {
     callback(null, utils.validationError('Missing request body'));
     return;
@@ -19,14 +20,23 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  const re = /^2\..+\|.+/;
-  if (!re.test(body.encryptedprivatekey)) {
+  if (!body.key || !body.masterpasswordhash || !body.newmasterpasswordhash) {
+    callback(null, utils.validationError('Missing parameter'));
+    return;
+  }
+
+  if (!bitwardenCrypto.CipherString.fromString(body.key)) {
     callback(null, utils.validationError('Invalid key'));
     return;
   }
 
-  user.set({ privateKey: body.encryptedprivatekey });
-  user.set({ publicKey: body.publickey });
+  if (hashesMatch(user.get('passwordHash'), body.masterpasswordhash)) {
+    user.set({ key: body.key });
+    user.set({ passwordHash: body.newmasterpasswordhash });
+  } else {
+    callback(null, utils.validationError('Wrong current password'));
+    return;
+  }
 
   const tokens = regenerateTokens(user, device);
 
@@ -41,21 +51,6 @@ export const handler = async (event, context, callback) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({
-        Key: user.get('key'),
-        Id: user.get('uuid'),
-        Name: user.get('name'),
-        Email: user.get('email'),
-        EmailVerified: user.get('emailVerified'),
-        Premium: user.get('premium'),
-        MasterPasswordHint: user.get('passwordHint'),
-        Culture: user.get('culture'),
-        TwoFactorEnabled: user.get('totpSecret'),
-        PrivateKey: user.get('privateKey'),
-        SecurityStamp: user.get('securityStamp'),
-        Organizations: '[]',
-        Object: 'profile',
-      }),
     });
   } catch (e) {
     callback(null, utils.serverError('Internal error', e));
