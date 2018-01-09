@@ -125,20 +125,8 @@ export const getHandler = async (event, context, callback) => {
 
   let ciphers;
   try {
-    if (event.pathParameters) {
-      const cipherUuid = event.pathParameters.uuid;
-      if (!cipherUuid) {
-        callback(null, utils.validationError('Missing vault item ID'));
-      }
-      ciphers = await Cipher.getAsync(user.get('uuid'), cipherUuid);
-
-      if (!ciphers) {
-        callback(null, utils.validationError('Unknown vault item'));
-        return;
-      }
-    } else {
-      ciphers = (await Cipher.query(user.get('uuid')).execAsync()).Items;
-    }
+    // TODO await in parallel
+    ciphers = (await Cipher.query(user.get('uuid')).execAsync()).Items;
   } catch (e) {
     callback(null, utils.serverError('Server error loading vault items', e));
     return;
@@ -148,13 +136,44 @@ export const getHandler = async (event, context, callback) => {
     Data: ciphers.map(mapCipher),
     Object: 'list',
   };
+
+  callback(null, {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
+    body: JSON.stringify(response),
+  });
+};
+
+export const getHandlerUuid = async (event, context, callback) => {
+  console.log('Get handler triggered', JSON.stringify(event, null, 2));
+
+  let user;
+  try {
+    ({ user } = await loadContextFromHeader(event.headers.Authorization));
+  } catch (e) {
+    callback(null, utils.validationError('User not found'));
+  }
+
+  const cipherUuid = event.pathParameters.uuid;
+  if (!cipherUuid) {
+    callback(null, utils.validationError('Missing vault item ID'));
+  }
+
+  const cipher = await Cipher.getAsync(user.get('uuid'), cipherUuid);
+
+  if (!cipher) {
+    callback(null, utils.validationError('Unknown vault item'));
+    return;
+  }
   try {
     callback(null, {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify(response),
+      body: JSON.stringify({ ...mapCipher(cipher) }),
     });
   } catch (e) {
     callback(null, utils.validationError(e.toString()));
