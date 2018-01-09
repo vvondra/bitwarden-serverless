@@ -90,6 +90,13 @@ functions:
           method: get
           <<: *default_cors
           path: api/ciphers
+  cipher_get_uuid:
+    handler: src/ciphers.getHandlerUuid
+    events:
+      - http:
+          method: get
+          <<: *default_cors
+          path: api/ciphers/{uuid}
   cipher_post:
     handler: src/ciphers.postHandler
     events:
