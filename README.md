@@ -47,9 +47,13 @@ Run `./two_factor.sh`, the script will ask you for the e-mail you want to set up
 
 ## Import existing data
 
-### Bitwarden
+**Note for all imports:** consider adding more Write capacity to the DynamoDB table for the import. The script will re-try to import the data, but it's not very well tested. A write capacity of 5 units should be safe for 500-1000 items. It can be reset to 1 afterwards.
 
 The import script will interactively ask for your master password. This is needed since the data in the CSV must be encrypted and some data like existing folders must be decrypted.
+
+### Bitwarden
+
+Go to https://help.bitwarden.com/article/export-your-data/
 
 ```bash
 ./import.sh -e user@example.com -f export.csv -p bitwarden
@@ -57,7 +61,11 @@ The import script will interactively ask for your master password. This is neede
 
 ### Lastpass
 
-TBD
+Go to https://lastpass.com/support.php?cmd=showfaq&id=1206
+
+```bash
+./import.sh -e user@example.com -f export.csv -p lastpass
+```
 
 ## Run on own domain
 

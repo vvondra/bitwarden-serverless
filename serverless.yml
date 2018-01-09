@@ -102,6 +102,10 @@ functions:
     handler: src/import.bitwardenHandler
     timeout: 180
     memorySize: 1024
+  import_lastpass:
+    handler: src/import.lastpassHandler
+    timeout: 180
+    memorySize: 1024
   default:
     handler: src/default.handler
     events:
