@@ -208,7 +208,7 @@ export const lastpassHandler = async (event, context, callback) => {
 
         const cipher = {
           userUuid: user.get('uuid'),
-          favorite: parseInt(row.favorite, 10) === 1,
+          favorite: parseInt(row.fav, 10) === 1,
         };
 
         const encrypt = (value) => {
@@ -219,53 +219,35 @@ export const lastpassHandler = async (event, context, callback) => {
           return s;
         };
 
-        if (row.folder) {
-          if (folders[row.folder]) {
-            cipher.folderUuid = folders[row.folder];
+        if (row.grouping) {
+          if (folders[row.grouping]) {
+            cipher.folderUuid = folders[row.grouping];
           } else {
             try {
               // Create folder if missing
-              const folder = await Folder.createAsync({ userUuid: user.get('uuid'), name: encrypt(row.folder) });
+              const folder = await Folder.createAsync({ userUuid: user.get('uuid'), name: encrypt(row.grouping) });
               cipher.folderUuid = folder.get('uuid');
-              folders[row.folder] = folder.get('uuid');
+              folders[row.grouping] = folder.get('uuid');
             } catch (e) {
               console.error('Error creating folder', e);
-              output.push('ERROR creating folder ' + row.folder);
+              output.push('ERROR creating folder ' + row.grouping);
             }
           }
         }
 
-        switch (row.type) {
-          case 'login':
-            cipher.type = bitwarden.TYPE_LOGIN;
-            break;
-          case 'note':
-            cipher.type = bitwarden.TYPE_NOTE;
-            break;
-          case 'card':
-            cipher.type = bitwarden.TYPE_CARD;
-            break;
-          default:
-            throw new Error('Unknown item type: ' + row.type);
-        }
-
         cipher.data = {
           Name: encrypt(row.name),
-          Notes: row.notes ? encrypt(row.notes) : undefined,
-          Uri: row.login_uri ? encrypt(row.login_uri) : undefined,
-          Username: row.login_username ? encrypt(row.login_username) : undefined,
-          Password: row.login_password ? encrypt(row.login_password) : undefined,
-          Totp: row.login_totp ? encrypt(row.login_totp) : undefined,
+          Notes: row.extra ? encrypt(row.extra) : undefined,
+          Uri: row.url ? encrypt(row.url) : undefined,
+          Username: row.username ? encrypt(row.username) : undefined,
+          Password: row.password ? encrypt(row.password) : undefined,
         };
 
-        if (row.fields) {
-          cipher.data.Fields = [];
-          const [key, value] = row.fields.split(': ', 2);
-          cipher.data.Fields.push({
-            Type: 0, // 0 = text, 1 = hidden, 2 = boolean
-            Name: encrypt(key),
-            Value: encrypt(value),
-          });
+        if (row.url === 'http://sn') {
+          cipher.type = bitwarden.TYPE_NOTE;
+          cipher.data.SecureNote = { Type: 0 };
+        } else {
+          cipher.type = bitwarden.TYPE_LOGIN;
         }
 
         // We always resolve so Promise.all doesn't use fail-fast
