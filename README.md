@@ -24,9 +24,9 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
 ## Current status
 
 - [x] Tested with Chrome extension
-- [ ] Tested with Android app
-- [ ] Tested with iOS app
-- [ ] Tested with Web vault
+- [x] Tested with Android app
+- [ ] Tested with iOS app (should work, feedback welcome)
+- [ ] Tested with Web vault (work needed for compatibility)
 
 ## Setup
 
