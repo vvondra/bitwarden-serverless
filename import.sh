@@ -8,6 +8,8 @@ display_usage() {
 csv=""
 email=""
 provider=""
+stage=${STAGE:-prod}
+region=${STAGE:-us-east-1}
 
 while getopts "h?e:f:p:" opt; do
     case "$opt" in
@@ -38,4 +40,4 @@ echo "Loading CSV and importing..."
 
 csv_payload=$(cat $csv | node -e 'require("get-stdin")().then(function(t){console.log(JSON.stringify(t))});')
 echo "{\"email\": \"${email}\",\"masterPassword\": \"${password}\",\"csv\": ${csv_payload}}" | \
- serverless invoke -s $STAGE -f import_${provider}
+ serverless invoke -s $STAGE -r $REGION -f import_${provider}
