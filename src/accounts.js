@@ -3,7 +3,7 @@ import { loadContextFromHeader } from './lib/bitwarden';
 import { getRevisionDateAsMillis } from './lib/mappers';
 
 export const revisionDateHandler = async (event, context, callback) => {
-  console.log('Acciont revision date handler triggered', JSON.stringify(event, null, 2));
+  console.log('Account revision date handler triggered', JSON.stringify(event, null, 2));
 
   let user;
   try {

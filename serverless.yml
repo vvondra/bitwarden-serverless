@@ -45,7 +45,7 @@ functions:
           method: post
           cors: true
           path: api/accounts/register
-  revision_date:
+  accounts_revision_date:
     handler: src/accounts.revisionDateHandler
     events:
       - http:

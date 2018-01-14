@@ -1,5 +1,5 @@
 import * as utils from './lib/api_utils';
-import { loadContextFromHeader, buildCipherDocument } from './lib/bitwarden';
+import { loadContextFromHeader, buildCipherDocument, touch } from './lib/bitwarden';
 import { mapCipher } from './lib/mappers';
 import { Cipher } from './lib/models';
 
@@ -28,6 +28,8 @@ export const postHandler = async (event, context, callback) => {
 
   try {
     const cipher = await Cipher.createAsync(buildCipherDocument(body, user));
+
+    await touch(user);
 
     callback(null, {
       statusCode: 200,
@@ -76,6 +78,7 @@ export const putHandler = async (event, context, callback) => {
     cipher.set(buildCipherDocument(body, user));
 
     cipher = await cipher.updateAsync();
+    await touch(user);
 
     callback(null, {
       statusCode: 200,
@@ -103,6 +106,7 @@ export const deleteHandler = async (event, context, callback) => {
 
   try {
     await Cipher.destroyAsync(user.get('uuid'), cipherUuid);
+    await touch(user);
 
     callback(null, {
       statusCode: 200,
