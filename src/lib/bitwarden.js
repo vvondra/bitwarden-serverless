@@ -138,6 +138,11 @@ export function generateSecret() {
   return crypto.randomBytes(64).toString('hex');
 }
 
+export async function touch(object) {
+  object.set({ updatedAt: new Date().toISOString() });
+  await object.updateAsync();
+}
+
 function generateToken() {
   return crypto.randomBytes(64)
     .toString('base64')
