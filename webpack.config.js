@@ -13,6 +13,7 @@ module.exports = {
       exclude: /node_modules/,
     }],
   },
+  externals: ['aws-sdk'],
   output: {
     libraryTarget: 'commonjs',
     path: path.join(__dirname, '.webpack'),

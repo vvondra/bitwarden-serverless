@@ -106,6 +106,12 @@ functions:
     handler: src/import.lastpassHandler
     timeout: 180
     memorySize: 1024
+  icons:
+    handler: src/icons.handler
+    events:
+      - http:
+          method: get
+          path: /icons/{domain}/icon.png
   default:
     handler: src/default.handler
     events:
