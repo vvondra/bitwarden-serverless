@@ -118,7 +118,7 @@ functions:
       - http:
           method: any
           cors: true
-          path: /{fallback}
+          path: /{fallback+}
 
 resources:
   Resources:
