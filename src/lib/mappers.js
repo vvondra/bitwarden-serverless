@@ -40,6 +40,10 @@ export function mapFolder(folder) {
   };
 }
 
+export function getRevisionDateAsMillis(object) {
+  return (new Date(getRevisionDate(object))).getTime();
+}
+
 function getRevisionDate(object) {
   // dynogels sets updated at only after update
   return object.get('updatedAt') || object.get('createdAt');
