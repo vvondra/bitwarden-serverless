@@ -101,6 +101,8 @@ functions:
           method: delete
           cors: true
           path: api/folders/{uuid}
+  migrate:
+    handler: src/migrate.migrateHandler
   two_factor_setup:
     handler: src/two_factor.setupHandler
   two_factor_complete:
