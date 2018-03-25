@@ -1,7 +1,4 @@
 export function mapCipher(cipher) {
-
-  const data = cipher.get('data')
-
   return {
     Id: cipher.get('uuid'),
     Type: cipher.get('type'),

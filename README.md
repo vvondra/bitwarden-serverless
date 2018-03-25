@@ -36,10 +36,19 @@ If you have AWS credentials set up, this should get you a running instance of th
 npm install -g serverless
 npm install
 # Feel free to deploy to an AWS region closer to your typical location
-serverless deploy --region us-east-1
+serverless deploy --region us-east-1 --stage prod
 ```
 
 The deploy command will return a service URL (e.g. `https://abcd01234.execute-api.us-east-1.amazonaws.com/prod`), which you can set up in Bitwarden as your own self-hosted endpoint.
+
+## Upgrade
+
+Simply re-deploy with `serverless deploy` from the latest checkout.
+
+Some releases need a a database migration. A special function is deployed for this purpose, invoke with:
+```bash
+serverless invoke -f migrate [--stage] [--region]
+```
 
 ## Enable 2FA
 
