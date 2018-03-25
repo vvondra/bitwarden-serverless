@@ -38,14 +38,6 @@ export const migrateHandler = async (event, context, callback) => {
           fields.name = data.Name || null;
           fields.notes = data.Notes || null;
           fields.fields = data.Fields || null;
-          if (cipher.get('type') === TYPE_LOGIN) {
-            fields.login = {
-              Uris: {
-                Uri: data.Uri,
-                Match: null,
-              },
-            };
-          }
 
           const fmap = {
             [TYPE_LOGIN]: 'login',
@@ -55,7 +47,18 @@ export const migrateHandler = async (event, context, callback) => {
           };
 
           fields[fmap[cipher.get('type')]] = omit(data, ['Name', 'Notes', 'Fields', 'Uri']);
+
+          if (cipher.get('type') === TYPE_LOGIN) {
+            fields.login.Uris = [
+              {
+                Uri: data.Uri,
+                Match: null,
+              },
+            ];
+          }
         }
+
+        fields.data = null;
 
         console.log('Updating with fields', fields);
         cipher.set(fields);
