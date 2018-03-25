@@ -89,7 +89,7 @@ export function buildCipherDocument(body, user) {
     type: parseInt(body.type, 10),
     name: body.name,
     notes: body.notes,
-    fields: []
+    fields: [],
   };
 
   let additionalParams = null;
@@ -99,22 +99,19 @@ export function buildCipherDocument(body, user) {
     additionalParams = 'card';
   } else if (params.type === TYPE_IDENTITY) {
     additionalParams = 'identity';
-  } else if (params.type === TYPE_NODE) {
+  } else if (params.type === TYPE_NOTE) {
     additionalParams = 'securenote';
   }
 
   if (additionalParams && body[additionalParams]) {
     params[additionalParams] = {};
     entries(body[additionalParams]).forEach(([key, value]) => {
+      let paramValue = value;
       if (ucfirst(key) === 'Uris') {
-        value = value.map((val) => {
-          return mapKeys(val, (uriValue, uriKey) => {
-            return ucfirst(uriKey);
-          });
-        });
+        paramValue = value.map(val => mapKeys(val, (uriValue, uriKey) => ucfirst(uriKey)));
       }
 
-      params[additionalParams][ucfirst(key)] = value;
+      params[additionalParams][ucfirst(key)] = paramValue;
     });
   }
 
