@@ -1,5 +1,3 @@
-import speakeasy from 'speakeasy';
-import qrcode from 'qrcode';
 import omit from 'lodash/omit';
 import {
   User,
