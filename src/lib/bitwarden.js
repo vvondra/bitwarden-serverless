@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import bufferEq from 'buffer-equal-constant-time';
 import entries from 'object.entries';
+import mapKeys from 'lodash/mapKeys';
 import { User, Device } from './models';
 
 const JWT_DEFAULT_ALGORITHM = 'HS256';
@@ -105,6 +106,14 @@ export function buildCipherDocument(body, user) {
   if (additionalParams && body[additionalParams]) {
     params[additionalParams] = {};
     entries(body[additionalParams]).forEach(([key, value]) => {
+      if (ucfirst(key) === 'Uris') {
+        value = value.map((val) => {
+          return mapKeys(val, (uriValue, uriKey) => {
+            return ucfirst(uriKey);
+          });
+        });
+      }
+
       params[additionalParams][ucfirst(key)] = value;
     });
   }
