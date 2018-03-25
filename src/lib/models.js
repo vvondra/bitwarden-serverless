@@ -61,9 +61,17 @@ export const Cipher = dynogels.define('Cipher', {
     folderUuid: Joi.string().allow(null),
     organizationUuid: Joi.string().allow(null),
     type: Joi.number(),
-    data: Joi.object(),
+    version: Joi.number().allow(null),
+    data: Joi.object().allow(null),
     favorite: Joi.boolean(),
     attachments: Joi.binary(),
+    name: Joi.string().allow(null),
+    notes: Joi.string().allow(null),
+    fields: Joi.any().allow(null),
+    login: Joi.object().allow(null),
+    securenote: Joi.object().allow(null),
+    identity: Joi.object().allow(null),
+    card: Joi.object().allow(null),
   },
 });
 

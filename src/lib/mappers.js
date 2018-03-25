@@ -8,7 +8,14 @@ export function mapCipher(cipher) {
     OrganizationId: cipher.get('organizationUuid'),
     Attachments: cipher.get('attachments'),
     OrganizationUseTotp: false,
-    Data: cipher.get('data'),
+    CollectionIds: [],
+    Name: cipher.get('name'),
+    Notes: cipher.get('notes'),
+    Fields: cipher.get('fields'),
+    Login: cipher.get('login'),
+    Card: cipher.get('card'),
+    Identity: cipher.get('identity'),
+    SecureNote: cipher.get('securenote'),
     Object: 'cipher',
   };
 }

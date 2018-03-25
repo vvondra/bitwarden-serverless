@@ -28,6 +28,7 @@ export const handler = async (event, context, callback) => {
     Profile: mapUser(user),
     Folders: folders.map(mapFolder),
     Ciphers: ciphers.map(mapCipher),
+    Collections: [],
     Domains: {
       EquivalentDomains: null,
       GlobalEquivalentDomains: [],

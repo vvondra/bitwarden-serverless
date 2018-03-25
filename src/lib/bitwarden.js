@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import bufferEq from 'buffer-equal-constant-time';
 import entries from 'object.entries';
+import mapKeys from 'lodash/mapKeys';
 import { User, Device } from './models';
 
 const JWT_DEFAULT_ALGORITHM = 'HS256';
@@ -9,6 +10,7 @@ const JWT_DEFAULT_ALGORITHM = 'HS256';
 export const TYPE_LOGIN = 1;
 export const TYPE_NOTE = 2;
 export const TYPE_CARD = 3;
+export const TYPE_IDENTITY = 4;
 
 export const DEFAULT_VALIDITY = 60 * 60;
 
@@ -85,11 +87,9 @@ export function buildCipherDocument(body, user) {
     folderUuid: body.folderid,
     favorite: !!body.favorite,
     type: parseInt(body.type, 10),
-  };
-
-  const data = {
-    Name: body.name,
-    Notes: body.notes,
+    name: body.name,
+    notes: body.notes,
+    fields: [],
   };
 
   let additionalParams = null;
@@ -97,15 +97,26 @@ export function buildCipherDocument(body, user) {
     additionalParams = 'login';
   } else if (params.type === TYPE_CARD) {
     additionalParams = 'card';
+  } else if (params.type === TYPE_IDENTITY) {
+    additionalParams = 'identity';
+  } else if (params.type === TYPE_NOTE) {
+    additionalParams = 'securenote';
   }
+
   if (additionalParams && body[additionalParams]) {
+    params[additionalParams] = {};
     entries(body[additionalParams]).forEach(([key, value]) => {
-      data[ucfirst(key)] = value;
+      let paramValue = value;
+      if (ucfirst(key) === 'Uris') {
+        paramValue = value.map(val => mapKeys(val, (uriValue, uriKey) => ucfirst(uriKey)));
+      }
+
+      params[additionalParams][ucfirst(key)] = paramValue;
     });
   }
 
   if (body.fields && Array.isArray(body.fields)) {
-    data.Fields = body.fields.map((field) => {
+    params.fields = body.fields.map((field) => {
       const vals = {};
       entries(field).forEach(([key, value]) => {
         vals[ucfirst(key)] = value;
@@ -113,11 +124,7 @@ export function buildCipherDocument(body, user) {
 
       return vals;
     });
-  } else {
-    data.Fields = null;
   }
-
-  params.data = data;
 
   return params;
 }

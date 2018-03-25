@@ -117,7 +117,7 @@ describe("Cipher API", function () {
       ).then(function(response) {
         expect(response).to.have.status(200);
         expect(response.body).to.have.property('Id');
-        expect(response.body.Data).to.have.property('Name', cipherBody.name);
+        expect(response.body).to.have.property('Name', cipherBody.name);
         expect(response.body).to.have.property('Favorite', cipherBody.favorite);
         expect(response.body).to.have.property('Type', cipherBody.type);
         expect(response.body).to.have.property('RevisionDate');
@@ -139,7 +139,7 @@ describe("Cipher API", function () {
       ).then(function(response) {
         expect(response).to.have.status(200);
         expect(response.body).to.have.property('Id', cipherId);
-        expect(response.body.Data).to.have.property('Name', cipherBody.name);
+        expect(response.body).to.have.property('Name', cipherBody.name);
         expect(response.body).to.have.property('Favorite', cipherBody.favorite);
         expect(response.body).to.have.property('Type', cipherBody.type);
         expect(response.body.RevisionDate).to.be.above(revisionDate);
@@ -187,8 +187,8 @@ describe("Cipher API", function () {
       ).then(function(response) {
         expect(response).to.have.status(200);
         expect(response.body).to.have.property('Id');
-        expect(response.body.Data).to.have.property('Name', cipherBody.name);
-        expect(response.body.Data).to.have.property('Number', cipherBody.card.number);
+        expect(response.body).to.have.property('Name', cipherBody.name);
+        expect(response.body.Card).to.have.property('Number', cipherBody.card.number);
         expect(response.body).to.have.property('Favorite', cipherBody.favorite);
         expect(response.body).to.have.property('Type', cipherBody.type);
         expect(response.body).to.have.property('RevisionDate');
