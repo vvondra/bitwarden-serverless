@@ -30,7 +30,7 @@
     "dynogels": "^9.0.0",
     "dynogels-promisified": "^1.0.4",
     "fast-csv": "^2.4.1",
-    "joi": "^13.0.2",
+    "joi": "^13.3.0",
     "jsonwebtoken": "^8.1.0",
     "lodash": "^4.17.5",
     "object.entries": "^1.0.4",
