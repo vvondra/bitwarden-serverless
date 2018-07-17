@@ -61,12 +61,14 @@ Run `./two_factor.sh`, the script will ask you for the e-mail you want to set up
 
 The import script will interactively ask for your master password. This is needed since the data in the CSV must be encrypted and some data like existing folders must be decrypted.
 
+In the example below, replace `STAGE` and `REGION` if necessary in regards to your setup.
+
 ### Bitwarden
 
 Go to https://help.bitwarden.com/article/export-your-data/
 
 ```bash
-./import.sh -e user@example.com -f export.csv -p bitwarden
+STAGE=prod REGION=us-east-1 ./import.sh -e user@example.com -f export.csv -p bitwarden
 ```
 
 ### Lastpass
@@ -74,7 +76,7 @@ Go to https://help.bitwarden.com/article/export-your-data/
 Go to https://lastpass.com/support.php?cmd=showfaq&id=1206
 
 ```bash
-./import.sh -e user@example.com -f export.csv -p lastpass
+STAGE=prod REGION=us-east-1 ./import.sh -e user@example.com -f export.csv -p lastpass
 ```
 
 ## Run on own domain
