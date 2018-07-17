@@ -9,7 +9,7 @@ csv=""
 email=""
 provider=""
 stage=${STAGE:-prod}
-region=${STAGE:-us-east-1}
+region=${REGION:-us-east-1}
 
 while getopts "h?e:f:p:" opt; do
     case "$opt" in
