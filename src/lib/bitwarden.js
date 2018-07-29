@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import bufferEq from 'buffer-equal-constant-time';
 import entries from 'object.entries';
 import mapKeys from 'lodash/mapKeys';
+import camelCase from 'lodash/camelCase';
 import { User, Device } from './models';
 
 const JWT_DEFAULT_ALGORITHM = 'HS256';
@@ -103,25 +104,22 @@ export function buildCipherDocument(body, user) {
     additionalParamsType = 'securenote';
   }
 
-  if (additionalParamsType !== null) {
-    const additionalParams = body[additionalParamsType] || body[ucfirst(additionalParamsType)];
-    if (additionalParams !== undefined) {
-      params[additionalParamsType] = {};
-      entries(additionalParams).forEach(([key, value]) => {
-        let paramValue = value;
-        if (ucfirst(key) === 'Uris' && value) {
-          paramValue = value.map(val => mapKeys(val, (_, uriKey) => ucfirst(uriKey)));
-        }
-        params[additionalParamsType][ucfirst(key)] = paramValue;
-      });
-    }
+  if (additionalParamsType !== null && additionalParamsType in body) {
+    params[additionalParamsType] = {};
+    entries(body[additionalParamsType]).forEach(([key, value]) => {
+      let paramValue = value;
+      if (camelCase(key) === 'Uris' && value) {
+        paramValue = value.map(val => mapKeys(val, (_, uriKey) => camelCase(uriKey)));
+      }
+      params[additionalParamsType][camelCase(key)] = paramValue;
+    });
   }
 
   if (body.fields && Array.isArray(body.fields)) {
     params.fields = body.fields.map((field) => {
       const vals = {};
       entries(field).forEach(([key, value]) => {
-        vals[ucfirst(key)] = value;
+        vals[camelCase(key)] = value;
       });
 
       return vals;
@@ -158,8 +156,4 @@ function generateToken() {
     .replace(/\+/g, '-') // Convert '+' to '-'
     .replace(/\//g, '_') // Convert '/' to '_'
     .replace(/=+$/, ''); // Remove ending '='
-}
-
-function ucfirst(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
 }
