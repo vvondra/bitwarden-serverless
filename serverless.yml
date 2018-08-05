@@ -146,6 +146,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
     DevicesTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -159,6 +161,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
     CiphersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -176,6 +180,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
     FoldersTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -193,3 +199,5 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
