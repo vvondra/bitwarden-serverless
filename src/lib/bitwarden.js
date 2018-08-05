@@ -92,26 +92,25 @@ export function buildCipherDocument(body, user) {
     fields: [],
   };
 
-  let additionalParams = null;
+  let additionalParamsType = null;
   if (params.type === TYPE_LOGIN) {
-    additionalParams = 'login';
+    additionalParamsType = 'login';
   } else if (params.type === TYPE_CARD) {
-    additionalParams = 'card';
+    additionalParamsType = 'card';
   } else if (params.type === TYPE_IDENTITY) {
-    additionalParams = 'identity';
+    additionalParamsType = 'identity';
   } else if (params.type === TYPE_NOTE) {
-    additionalParams = 'securenote';
+    additionalParamsType = 'securenote';
   }
 
-  if (additionalParams && body[additionalParams]) {
-    params[additionalParams] = {};
-    entries(body[additionalParams]).forEach(([key, value]) => {
+  if (additionalParamsType !== null && additionalParamsType in body) {
+    params[additionalParamsType] = {};
+    entries(body[additionalParamsType]).forEach(([key, value]) => {
       let paramValue = value;
-      if (ucfirst(key) === 'Uris') {
-        paramValue = value.map(val => mapKeys(val, (uriValue, uriKey) => ucfirst(uriKey)));
+      if (ucfirst(key) === 'Uris' && value) {
+        paramValue = value.map(val => mapKeys(val, (_, uriKey) => ucfirst(uriKey)));
       }
-
-      params[additionalParams][ucfirst(key)] = paramValue;
+      params[additionalParamsType][ucfirst(key)] = paramValue;
     });
   }
 
