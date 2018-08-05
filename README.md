@@ -79,6 +79,17 @@ Go to https://lastpass.com/support.php?cmd=showfaq&id=1206
 STAGE=prod REGION=us-east-1 ./import.sh -e user@example.com -f export.csv -p lastpass
 ```
 
+## Export data
+
+You can export your data most easily using the official Bitwarden CLI, this server is API compatible with it.
+
+```bash
+npm install -g @bitwarden/cli
+bw config server <api gateway url> # e.g. https://abcdefg.execute-api.us-east-1.amazonaws.com/prod/
+# follow instructions in terminal about session env variable
+bw export
+```
+
 ## Run on own domain
 
 By default you will get a generated API gateway URL which is quite long. You can use the stack through a custom CNAME of your choice.

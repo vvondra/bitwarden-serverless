@@ -30,20 +30,37 @@ provider:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CIPHERS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.FOLDERS_TABLE}"
 
+default_cors: &default_cors
+  cors:
+    origin: "*"
+    headers:
+      - Content-Type
+      - Authorization
+      - Accept
+      - Device-type # Special serverless header being sent
+    allowMethods: "GET, POST, OPTIONS, PUT, DELETE"
+
 functions:
   login:
     handler: src/login.handler
     events:
       - http:
           method: post
-          cors: true
+          <<: *default_cors
           path: identity/connect/token
+  keys:
+    handler: src/keys.handler
+    events:
+      - http:
+          method: post
+          <<: *default_cors
+          path: api/accounts/keys
   register:
     handler: src/register.handler
     events:
       - http:
           method: post
-          cors: true
+          <<: *default_cors
           path: api/accounts/register
   accounts_revision_date:
     handler: src/accounts.revisionDateHandler
@@ -57,49 +74,49 @@ functions:
     events:
       - http:
           method: get
-          cors: true
+          <<: *default_cors
           path: api/sync
   cipher_post:
     handler: src/ciphers.postHandler
     events:
       - http:
           method: post
-          cors: true
+          <<: *default_cors
           path: api/ciphers
   cipher_put:
     handler: src/ciphers.putHandler
     events:
       - http:
           method: put
-          cors: true
+          <<: *default_cors
           path: api/ciphers/{uuid}
   cipher_delete:
     handler: src/ciphers.deleteHandler
     events:
       - http:
           method: delete
-          cors: true
+          <<: *default_cors
           path: api/ciphers/{uuid}
   folder_post:
     handler: src/folders.postHandler
     events:
       - http:
           method: post
-          cors: true
+          <<: *default_cors
           path: api/folders
   folder_put:
     handler: src/folders.putHandler
     events:
       - http:
           method: put
-          cors: true
+          <<: *default_cors
           path: api/folders/{uuid}
   folder_delete:
     handler: src/folders.deleteHandler
     events:
       - http:
           method: delete
-          cors: true
+          <<: *default_cors
           path: api/folders/{uuid}
   migrate:
     handler: src/migrate.migrateHandler
