@@ -1,284 +1,149 @@
-import fastcsv from 'fast-csv';
-import { User, Cipher } from './lib/models';
-import * as bitwardenCrypto from './lib/crypto';
-import * as bitwarden from './lib/bitwarden';
-import { loadFolders } from './lib/import';
+import { normalizeBody, validationError } from './lib/api_utils';
+import { Cipher, Folder } from './lib/models';
+import { loadContextFromHeader, buildCipherDocument, touch } from './lib/bitwarden';
 
-async function loadUser(event) {
-  if (!event.email) {
-    throw new Error('E-mail must be supplied');
-  }
+const MAX_RETRIES = 4;
 
-  if (!event.masterPassword) {
-    throw new Error('Master password must be supplied');
-  }
-
-  if (!event.csv) {
-    throw new Error('CSV must be supplied');
-  }
-
-  const email = event.email.toLowerCase();
-  try {
-    const [user] = (await User.scan()
-      .where('email').equals(email)
-      .execAsync()).Items;
-
-    const passwordHash = await bitwardenCrypto.hashPasswordAsync(event.masterPassword, email);
-    if (passwordHash !== user.get('passwordHash')) {
-      throw new Error('Invalid password supplied');
-    }
-
-    return user;
-  } catch (e) {
-    throw new Error('User not found');
-  }
-}
-
-export const bitwardenHandler = async (event, context, callback) => {
-  console.log('Bitwarden import handler triggered', JSON.stringify(event, null, 2));
-
+const resolveHandler = async (promiseList, user, fcb) => {
   const output = [];
-
-  let user;
-  try {
-    user = await loadUser(event);
-  } catch (e) {
-    callback(null, e.message);
-    return;
-  }
-
-  try {
-    const masterKey = await bitwardenCrypto.makeKeyAsync(event.masterPassword, user.get('email'));
-
-    const folders = await loadFolders(user, masterKey, event.csv, row => row.folder);
-    console.log('Already known folders', folders);
-
-    const savePromises = [];
-
-    fastcsv.fromString(event.csv, { headers: true })
-      .on('data', async (row) => {
-        if (!row.name) {
-          return;
-        }
-        output.push('Storing ' + row.name);
-
-        const cipher = {
-          userUuid: user.get('uuid'),
-          favorite: parseInt(row.favorite, 10) === 1,
-        };
-
-        const encrypt = (value) => {
-          const s = bitwardenCrypto
-            .encryptWithMasterPasswordKey(value, user.get('key'), masterKey)
-            .toString();
-
-          return s;
-        };
-
-        if (row.folder) {
-          if (folders[row.folder]) {
-            cipher.folderUuid = folders[row.folder];
+  let retryCount = 0;
+  let failedPromises = promiseList;
+  while (failedPromises.length > 0 && retryCount < MAX_RETRIES) {
+    retryCount += 1;
+    failedPromises = await Promise.all(failedPromises) // eslint-disable-line
+      .then((results) => {
+        const toRetry = [];
+        for (let i = 0; i < results.length; i += 1) {
+          const res = results[i];
+          if (!res.success) {
+            output.push('ERR: ' + res.code);
+            console.error('ERR: ' + res.code);
+            const { model } = res;
+            const retryPromise = new Promise((resolve) => {
+              // Delay by 1-3s to get throughput lower
+              // lambda has a limit of 30s for functions on API GWs
+              setTimeout(resolve, Math.floor(Math.random() * 3000));
+            }).then(() => fcb(model, user));
+            toRetry.push(retryPromise);
           }
         }
-
-        switch (row.type) {
-          case 'login':
-            cipher.type = bitwarden.TYPE_LOGIN;
-            break;
-          case 'note':
-            cipher.type = bitwarden.TYPE_NOTE;
-            break;
-          case 'card':
-            cipher.type = bitwarden.TYPE_CARD;
-            break;
-          default:
-            throw new Error('Unknown item type: ' + row.type);
-        }
-
-        cipher.data = {
-          Name: encrypt(row.name),
-          Notes: row.notes ? encrypt(row.notes) : undefined,
-          Uri: row.login_uri ? encrypt(row.login_uri) : undefined,
-          Username: row.login_username ? encrypt(row.login_username) : undefined,
-          Password: row.login_password ? encrypt(row.login_password) : undefined,
-          Totp: row.login_totp ? encrypt(row.login_totp) : undefined,
-        };
-
-        if (row.fields) {
-          cipher.data.Fields = [];
-          const [key, value] = row.fields.split(': ', 2);
-          cipher.data.Fields.push({
-            Type: 0, // 0 = text, 1 = hidden, 2 = boolean
-            Name: encrypt(key),
-            Value: encrypt(value),
-          });
-        }
-
-        // We always resolve so Promise.all doesn't use fail-fast
-        savePromises.push(Cipher.createAsync(cipher)
-          .then(result => ({ success: true, result, cipher }))
-          .catch(error => ({ success: false, error, cipher })));
-      })
-      .on('error', (e) => {
-        console.error('Error parsing CSV row', e);
-        output.push('ERROR parsing import row:' + e);
-      })
-      .on('end', async () => {
-        console.log('Waiting for imports to finish');
-        let failedPromises = savePromises;
-        while (failedPromises.length > 0) {
-          failedPromises = await Promise.all(failedPromises) // eslint-disable-line
-            .then((results) => {
-              const toRetry = [];
-              for (let i = 0; i < results.length; i += 1) {
-                const res = results[i];
-                if (!res.success) {
-                  output.push('ERR: ' + res.code);
-                  console.error('ERR: ' + res.code);
-
-                  const { cipher } = res;
-                  const retryPromise = new Promise((resolve) => {
-                    // Delay by 1-30s to get throughput lower
-                    setTimeout(resolve, Math.floor(Math.random() * 30000));
-                  }).then(() => {
-                    Cipher.createAsync(cipher)
-                      .then(result => ({ success: true, result, cipher }))
-                      .catch(error => ({ success: false, error, cipher }));
-                  });
-                  toRetry.push(retryPromise);
-                }
-              }
-
-              const msg = 'DONE, total: ' + results.length + ', error: ' + toRetry.length;
-              console.log(msg);
-              output.push(msg);
-
-              return toRetry;
-            });
-
-          console.log('Retrying ' + failedPromises + ' calls');
-        }
-
-        callback(null, output);
+        const msg = 'DONE, total: ' + results.length
+          + ', error: ' + toRetry.length
+          + ', rounds: ' + retryCount;
+        console.log(msg);
+        output.push(msg);
+        return toRetry;
       });
-  } catch (e) {
-    console.error('Exception processing import data', e);
-    callback(null, 'ERROR: ' + e);
+
+    console.log('Retrying ' + failedPromises + ' calls');
   }
+  return {
+    output,
+    failedPromises,
+  };
 };
 
-export const lastpassHandler = async (event, context, callback) => {
-  console.log('Lastpass import handler triggered', JSON.stringify(event, null, 2));
+export const postHandler = async (event, context, callback) => {
+  console.log('Bitwarden import handler triggered');
 
-  const output = [];
+  /**
+   * Data validation
+   */
 
   let user;
   try {
-    user = await loadUser(event);
+    ({ user } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
-    callback(null, e.message);
+    callback(null, validationError('User not found: ' + e.message));
     return;
   }
 
-
-  try {
-    const masterKey = await bitwardenCrypto.makeKeyAsync(event.masterPassword, user.get('email'));
-
-    const folders = await loadFolders(user, masterKey, event.csv, row => row.grouping);
-    console.log('Already known folders', folders);
-
-    const savePromises = [];
-
-    fastcsv.fromString(event.csv, { headers: true })
-      .on('data', async (row) => {
-        if (!row.name) {
-          return;
-        }
-        output.push('Storing ' + row.name);
-
-        const cipher = {
-          userUuid: user.get('uuid'),
-          favorite: parseInt(row.fav, 10) === 1,
-        };
-
-        const encrypt = (value) => {
-          const s = bitwardenCrypto
-            .encryptWithMasterPasswordKey(value, user.get('key'), masterKey)
-            .toString();
-
-          return s;
-        };
-
-        if (row.grouping) {
-          if (folders[row.grouping]) {
-            cipher.folderUuid = folders[row.grouping];
-          }
-        }
-
-        cipher.data = {
-          Name: encrypt(row.name),
-          Notes: row.extra ? encrypt(row.extra) : undefined,
-          Uri: row.url ? encrypt(row.url) : undefined,
-          Username: row.username ? encrypt(row.username) : undefined,
-          Password: row.password ? encrypt(row.password) : undefined,
-        };
-
-        if (row.url === 'http://sn') {
-          cipher.type = bitwarden.TYPE_NOTE;
-          cipher.data.SecureNote = { Type: 0 };
-        } else {
-          cipher.type = bitwarden.TYPE_LOGIN;
-        }
-
-        // We always resolve so Promise.all doesn't use fail-fast
-        savePromises.push(Cipher.createAsync(cipher)
-          .then(result => ({ success: true, result, cipher }))
-          .catch(error => ({ success: false, error, cipher })));
-      })
-      .on('error', (e) => {
-        console.error('Error parsing CSV row', e);
-        output.push('ERROR parsing import row:' + e);
-      })
-      .on('end', async () => {
-        console.log('Waiting for imports to finish');
-        let failedPromises = savePromises;
-        while (failedPromises.length > 0) {
-          failedPromises = await Promise.all(failedPromises) // eslint-disable-line
-            .then((results) => {
-              const toRetry = [];
-              for (let i = 0; i < results.length; i += 1) {
-                const res = results[i];
-                if (!res.success) {
-                  output.push('ERR: ' + res.code);
-                  console.error('ERR: ' + res.code);
-
-                  const { cipher } = res;
-                  const retryPromise = new Promise((resolve) => {
-                    // Delay by 1-30s to get throughput lower
-                    setTimeout(resolve, Math.floor(Math.random() * 30000));
-                  }).then(() => {
-                    Cipher.createAsync(cipher)
-                      .then(result => ({ success: true, result, cipher }))
-                      .catch(error => ({ success: false, error, cipher }));
-                  });
-                  toRetry.push(retryPromise);
-                }
-              }
-
-              const msg = 'DONE, total: ' + results.length + ', error: ' + toRetry.length;
-              console.log(msg);
-              output.push(msg);
-
-              return toRetry;
-            });
-
-          console.log('Retrying ' + failedPromises + ' calls');
-        }
-
-        callback(null, output);
-      });
-  } catch (e) {
-    console.error('Exception processing import data', e);
-    callback(null, 'ERROR: ' + e);
+  if (!event.body) {
+    callback(null, validationError('Request body is missing'));
+    return;
   }
+
+  const body = normalizeBody(JSON.parse(event.body));
+
+  /**
+   * Folder creation
+   */
+
+  if (!Array.isArray(body.folders)) {
+    callback(null, validationError('Folders is not an array'));
+    return;
+  }
+
+  const createFolder = (f, u) => (Folder
+    .createAsync({
+      name: f.name,
+      userUuid: u.get('uuid'),
+    })
+    .then(result => ({ success: true, result, model: f }))
+    .catch(error => ({ success: false, error, model: f }))
+  );
+
+  const folderPromises = body.folders.map(folder => createFolder(folder, user));
+
+  const {
+    output: folderOutput,
+    failedPromises: folderFailedPromises,
+  } = await resolveHandler(folderPromises, user, createFolder);
+
+  if (folderFailedPromises.length > 0) {
+    folderOutput.push('Unable to complete for ' + folderFailedPromises.length + ' folders');
+    callback(null, validationError(folderOutput.join(' ')));
+  }
+
+  /**
+   * Cipher creation
+   */
+
+  if (!Array.isArray(body.ciphers)) {
+    callback(null, validationError('Ciphers is not an array'));
+    return;
+  } else if (!Array.isArray(body.folderrelationships)) {
+    callback(null, validationError('FolderRelationships is not an array'));
+    return;
+  }
+
+  const createCipher = (c, u) => (Cipher
+    .createAsync(buildCipherDocument(c, u))
+    .then(result => ({ success: true, result, model: c }))
+    .catch(error => ({ success: false, error, model: c }))
+  );
+
+  const cipherPromises = [];
+  for (let i = 0; i < body.ciphers.length; i += 1) {
+    const cipher = buildCipherDocument(body.ciphers[i], user);
+    const destFolder = body.folderrelationships.filter(fr => fr.key === i);
+    if (destFolder.length === 1) {
+      const whichFolder = destFolder[0].value;
+      if (folderPromises.length > whichFolder) {
+        const { result: folder } = await folderPromises[whichFolder]; // eslint-disable-line
+        cipher.folderUuid = folder.uuid;
+      } else {
+        callback(null, validationError('Folder defined in folder relationships was missing'));
+        return;
+      }
+    }
+    cipherPromises.push(createCipher(cipher, user));
+  }
+
+  const {
+    output: cipherOutput,
+    failedPromises: cipherFailedPromises,
+  } = await resolveHandler(cipherPromises, user, createCipher);
+
+  if (cipherFailedPromises.length > 0) {
+    cipherOutput.push('Unable to complete for ' + cipherFailedPromises.length + ' ciphers');
+    callback(null, validationError(cipherOutput.join(' ')));
+  }
+
+  await touch(user);
+
+  callback(null, {
+    statusCode: 200,
+    body: '',
+  });
 };
