@@ -7,6 +7,7 @@
     "no-console": ["off"],
     "import/prefer-default-export": ["off"],
     "no-use-before-define": ["off"],
-    "prefer-template": ["off"]
+    "prefer-template": ["off"],
+    "no-loop-func": ["off"]
   }
 }

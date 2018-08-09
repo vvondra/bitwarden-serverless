@@ -133,14 +133,14 @@ functions:
     handler: src/two_factor.setupHandler
   two_factor_complete:
     handler: src/two_factor.completeHandler
-  import_bitwarden:
-    handler: src/import.bitwardenHandler
-    timeout: 180
-    memorySize: 1024
-  import_lastpass:
-    handler: src/import.lastpassHandler
-    timeout: 180
-    memorySize: 1024
+  import:
+    handler: src/import.postHandler
+    timeout: 300
+    events:
+      - http:
+          method: post
+          <<: *default_cors
+          path: /api/ciphers/import
   icons:
     handler: src/icons.handler
     events:
