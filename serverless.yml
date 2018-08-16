@@ -135,7 +135,7 @@ functions:
     handler: src/two_factor.completeHandler
   import:
     handler: src/import.postHandler
-    timeout: 300
+    timeout: 30
     events:
       - http:
           method: post
@@ -203,7 +203,7 @@ resources:
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+          WriteCapacityUnits: 3
         PointInTimeRecoverySpecification:
           PointInTimeRecoveryEnabled: true
     FoldersTable:
