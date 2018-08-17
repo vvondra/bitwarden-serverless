@@ -41,6 +41,13 @@ default_cors: &default_cors
     allowMethods: "GET, POST, OPTIONS, PUT, DELETE"
 
 functions:
+  prelogin:
+    handler: src/prelogin.handler
+    events:
+      - http:
+          method: post
+          <<: *default_cors
+          path: api/accounts/prelogin
   login:
     handler: src/login.handler
     events:
