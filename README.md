@@ -12,14 +12,15 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
 
   * [Current status](#current-status)
   * [Setup](#setup)
+  * [Upgrade](#upgrade)
   * [Enable 2FA](#enable-2fa)
   * [Import existing data](#import-existing-data)
-    + [Bitwarden](#bitwarden)
-    + [Lastpass](#lastpass)
+  * [Export data](#export-data)
   * [Run on own domain](#run-on-own-domain)
   * [Motivation](#motivation)
   * [Development](#development)
   * [TODO](#todo)
+
 
 ## Current status
 
