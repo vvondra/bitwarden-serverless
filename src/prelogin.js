@@ -1,6 +1,5 @@
+import { KDF_PBKDF2 } from './lib/crypto';
 import * as utils from './lib/api_utils';
-
-const KDF_PBKDF2 = 0;
 
 export const handler = async (event, context, callback) => {
   callback(null, {
