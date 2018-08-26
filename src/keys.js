@@ -45,9 +45,7 @@ export const handler = async (event, context, callback) => {
   try {
     callback(null, {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: utils.CORS_HEADERS,
       body: JSON.stringify({
         access_token: tokens.accessToken,
         expires_in: DEFAULT_VALIDITY,

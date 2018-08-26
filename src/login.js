@@ -68,6 +68,7 @@ export const handler = async (event, context, callback) => {
           if (!verified) {
             callback(null, {
               statusCode: 400,
+              headers: utils.CORS_HEADERS,
               body: JSON.stringify({
                 error: 'invalid_grant',
                 error_description: 'Two factor required.',
@@ -150,9 +151,7 @@ export const handler = async (event, context, callback) => {
 
     callback(null, {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: utils.CORS_HEADERS,
       body: JSON.stringify({
         access_token: tokens.accessToken,
         expires_in: DEFAULT_VALIDITY,

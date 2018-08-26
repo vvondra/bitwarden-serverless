@@ -1,5 +1,5 @@
 import omit from 'lodash/omit';
-import { Cipher } from './lib/models';
+import { Cipher, User } from './lib/models';
 import {
   TYPE_LOGIN,
   TYPE_NOTE,
@@ -11,14 +11,32 @@ export const migrateHandler = async (event, context, callback) => {
   console.log('Data migration handler triggered', JSON.stringify(event, null, 2));
 
   let ciphers;
+  let users;
   try {
     ciphers = (await Cipher.scan().execAsync()).Items;
+    users = (await User.scan().execAsync()).Items;
   } catch (e) {
     callback(null, 'Server error loading vault items ' + e.message);
     return;
   }
 
-  let i = 0;
+  let userCount = 0;
+  users.forEach(async (user) => {
+    const version = user.get('version');
+    console.log('Checking user ' + user.get('uuid') + ' with version ' + version);
+    switch (version) {
+      case 1:
+        console.log('Already up-to-date');
+        break;
+      default:
+        userCount += 1;
+        user.set({ emailVerified: true, version: 1 });
+        await user.updateAsync();
+        break;
+    }
+  });
+
+  let cipherCount = 0;
   ciphers.forEach(async (cipher) => {
     const version = cipher.get('version');
     console.log('Checking cipher ' + cipher.get('uuid') + ' with version ' + version);
@@ -28,7 +46,7 @@ export const migrateHandler = async (event, context, callback) => {
         console.log('Already up-to-date');
         break;
       default: {
-        i += 1;
+        cipherCount += 1;
         const fields = {
           version: 1,
         };
@@ -68,5 +86,5 @@ export const migrateHandler = async (event, context, callback) => {
     }
   });
 
-  callback(null, 'Migrated ' + i + ' ciphers.');
+  callback(null, 'Migrated ' + cipherCount + ' ciphers and ' + userCount + ' users.');
 };
