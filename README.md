@@ -28,7 +28,7 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
 - [x] Tested with Android app
 - [x] Tested with Desktop app (macOS)
 - [x] Tested with iOS app
-- [ ] Tested with Web vault (work needed for compatibility)
+- [ ] Tested with Web vault (login, 2FA, and sync to read works, not tested further)
 
 ## Setup
 
