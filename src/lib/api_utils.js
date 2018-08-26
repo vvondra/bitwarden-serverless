@@ -9,7 +9,7 @@ export function normalizeBody(body) {
 
 export const CORS_HEADERS = {
   'access-control-allow-origin': '*',
-  'access-control-allow-headers': 'Content-Type,Authorization,Accept,Device-type,Pragma',
+  'access-control-allow-headers': 'Content-Type,Authorization,Accept,Device-type,Pragma,Cache-Control',
 };
 
 export function validationError(message) {
