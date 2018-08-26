@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import bufferEq from 'buffer-equal-constant-time';
 import entries from 'object.entries';
 import mapKeys from 'lodash/mapKeys';
-import { User, Device } from './models';
+import { User, Device, CIPHER_MODEL_VERSION, USER_MODEL_VERSION } from './models';
 
 const JWT_DEFAULT_ALGORITHM = 'HS256';
 
@@ -90,6 +90,7 @@ export function buildCipherDocument(body, user) {
     name: body.name,
     notes: body.notes,
     fields: [],
+    version: CIPHER_MODEL_VERSION,
   };
 
   let additionalParamsType = null;
@@ -137,6 +138,8 @@ export function buildUserDocument(body) {
     jwtSecret: generateSecret(),
     culture: 'en-US', // Hard-coded unless supplied from elsewhere
     premium: true,
+    emailVerified: true, // Web-vault requires verified e-mail
+    version: USER_MODEL_VERSION,
   };
 }
 

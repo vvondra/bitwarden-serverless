@@ -43,9 +43,7 @@ export const handler = async (event, context, callback) => {
 
     callback(null, {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: utils.CORS_HEADERS,
       body: '',
     });
   } catch (e) {

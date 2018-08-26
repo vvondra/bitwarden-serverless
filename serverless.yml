@@ -37,7 +37,9 @@ default_cors: &default_cors
       - Content-Type
       - Authorization
       - Accept
-      - Device-type # Special serverless header being sent
+      # Special serverless header being sent
+      - Device-type
+      - Pragma
     allowMethods: "GET, POST, OPTIONS, PUT, DELETE"
 
 functions:
@@ -74,7 +76,7 @@ functions:
     events:
       - http:
           method: get
-          cors: true
+          <<: *default_cors
           path: api/accounts/revision-date
   sync:
     handler: src/sync.handler
@@ -152,7 +154,7 @@ functions:
     events:
       - http:
           method: any
-          cors: true
+          <<: *default_cors
           path: /{fallback+}
 
 resources:

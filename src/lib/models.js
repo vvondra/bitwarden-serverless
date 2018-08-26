@@ -9,6 +9,9 @@ const folderTableName = process.env.FOLDERS_TABLE;
 // Bind internal dynogels logger to console, it supports warn/info/error as needed
 dynogels.log = console;
 
+export const CIPHER_MODEL_VERSION = 1;
+export const USER_MODEL_VERSION = 1;
+
 export const Device = dynogels.define('Device', {
   hashKey: 'uuid',
   timestamps: true,
@@ -46,6 +49,7 @@ export const User = dynogels.define('User', {
     totpSecretTemp: Joi.string().allow(null),
     securityStamp: dynogels.types.uuid(),
     culture: Joi.string(),
+    version: Joi.number().allow(null),
   },
 });
 
