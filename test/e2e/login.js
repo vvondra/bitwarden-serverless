@@ -167,7 +167,6 @@ describe("Login API", function () {
     var registrationBody = getRegistrationBody();
     var loginBody = getAndroidLoginBody();
     loginBody.username = registrationBody.email;
-    loginBody.deviceType = "Android";
 
     return chakram.post(
       process.env.API_URL + "/api/accounts/register",
@@ -179,7 +178,7 @@ describe("Login API", function () {
         {
           form: loginBody,
           headers: {
-            'Device-Type': 0
+            'Device-Type': 'Android'
           }
         }
       );
