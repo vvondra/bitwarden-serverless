@@ -107,7 +107,7 @@ export const handler = async (event, context, callback) => {
         if (body.devicename && deviceType) {
           device.set({
             // Browser extension sends body, web and mobile send header
-            type: event.headers['Device-Type'] || body.devicetype,
+            type: deviceType,
             name: body.devicename,
           });
         }
@@ -158,7 +158,7 @@ export const handler = async (event, context, callback) => {
         token_type: 'Bearer',
         refresh_token: tokens.refreshToken,
         Key: user.get('key'),
-        PrivateKey: user.get('privateKey'),
+        PrivateKey: (user.get('privateKey') || '').toString('utf8'),
       }),
     });
   } catch (e) {

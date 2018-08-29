@@ -151,6 +151,7 @@ describe("Login API", function () {
       expect(body.expires_in).to.equal(3600);
       expect(body.token_type).to.equal('Bearer');
       expect(body.Key).to.equal(registrationBody.key);
+      expect(Array.isArray(body.PrivateKey)).to.equal(false);
 
       var decoded = jwt.decode(body.access_token, { complete: true });
 
@@ -177,7 +178,7 @@ describe("Login API", function () {
         {
           form: loginBody,
           headers: {
-            'Device-Type': 0
+            'Device-Type': 'Android'
           }
         }
       );
