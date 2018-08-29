@@ -107,15 +107,15 @@ export const postHandler = async (event, context, callback) => {
     return;
   }
 
-  const createCipher = (c, u) => (Cipher
-    .createAsync(buildCipherDocument(c, u))
-    .then(result => ({ success: true, result, model: c }))
-    .catch(error => ({ success: false, error, model: c }))
+  const createCipher = cipher => (
+    Cipher.createAsync(cipher)
+      .then(result => ({ success: true, result, model: cipher }))
+      .catch(error => ({ success: false, error, model: cipher }))
   );
 
   const cipherPromises = [];
   for (let i = 0; i < body.ciphers.length; i += 1) {
-    const cipher = buildCipherDocument(body.ciphers[i], user);
+    const cipher = buildCipherDocument(normalizeBody(body.ciphers[i]), user);
     const destFolder = body.folderrelationships.filter(fr => fr.key === i);
     if (destFolder.length === 1) {
       const whichFolder = destFolder[0].value;
@@ -127,7 +127,7 @@ export const postHandler = async (event, context, callback) => {
         return;
       }
     }
-    cipherPromises.push(createCipher(cipher, user));
+    cipherPromises.push(createCipher(cipher));
   }
 
   const {
