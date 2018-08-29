@@ -158,7 +158,7 @@ export const handler = async (event, context, callback) => {
         token_type: 'Bearer',
         refresh_token: tokens.refreshToken,
         Key: user.get('key'),
-        PrivateKey: user.get('privateKey').toString('utf8'),
+        PrivateKey: (user.get('privateKey') || '').toString('utf8'),
       }),
     });
   } catch (e) {
