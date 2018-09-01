@@ -18,6 +18,20 @@ describe('Bitwarden cipher format', function() {
     expect(key.toString('base64')).not.to.equal(b64);
   });
 
+  it('should make a key from a password and salt with custom iterations', async function() {
+    const b64 = 'po5TVU6sC7LO6C9yexkVGESLY1iVvXrZZ9Qp3SbfFJ4=';
+
+    let key = await bitwardenCrypto.makeKeyAsync('this is a password', 'nobody@example.com', bitwardenCrypto.KDF_PBKDF2, 10000);
+    expect(key.toString('base64')).to.equal(b64);
+
+    // make sure key and salt affect it
+    key = await bitwardenCrypto.makeKeyAsync('this is a password', 'nobody2@example.com')
+    expect(key.toString('base64')).not.to.equal(b64);
+
+    key = await bitwardenCrypto.makeKeyAsync('this is A password', 'nobody@example.com')
+    expect(key.toString('base64')).not.to.equal(b64);
+  });
+
   it('should make a cipher string from a key', async function() {
     const encryptionKey = bitwardenCrypto.makeEncryptionKey(
       await bitwardenCrypto.makeKeyAsync('this is a password', 'nobody@example.com')
@@ -29,6 +43,11 @@ describe('Bitwarden cipher format', function() {
   it('should hash a password', async function() {
     expect(await bitwardenCrypto.hashPasswordAsync('secret password', 'user@example.com'))
       .to.equal('VRlYxg0x41v40mvDNHljqpHcqlIFwQSzegeq+POW1ww=');
+  });
+
+  it('should hash a password with custom iterations', async function() {
+    expect(await bitwardenCrypto.hashPasswordAsync('secret password', 'user@example.com', bitwardenCrypto.KDF_PBKDF2, 10000))
+      .to.equal('tpd8Jm+BgCD8zrO9NBqipBJ63jnyWfRj3vu4zwppBnQ=');
   });
 
   it('should parse a cipher string', function() {
