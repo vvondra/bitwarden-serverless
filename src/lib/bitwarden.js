@@ -4,6 +4,7 @@ import bufferEq from 'buffer-equal-constant-time';
 import entries from 'object.entries';
 import mapKeys from 'lodash/mapKeys';
 import { User, Device, CIPHER_MODEL_VERSION, USER_MODEL_VERSION } from './models';
+import { KDF_PBKDF2_ITERATIONS_DEFAULT } from './crypto';
 
 const JWT_DEFAULT_ALGORITHM = 'HS256';
 
@@ -134,6 +135,7 @@ export function buildUserDocument(body) {
     email: body.email.toLowerCase(),
     passwordHash: body.masterpasswordhash,
     passwordHint: body.masterpasswordhint,
+    kdfIterations: body.kdfiterations || KDF_PBKDF2_ITERATIONS_DEFAULT,
     key: body.key,
     jwtSecret: generateSecret(),
     culture: 'en-US', // Hard-coded unless supplied from elsewhere

@@ -8,6 +8,12 @@ export const TYPE_RSA2048_OAEPSHA1_B64 = 4;
 export const TYPE_RSA2048_OAEPSHA256_HMACSHA256_B64 = 5;
 export const TYPE_RSA2048_OAEPSHA1_HMACSHA256_B64 = 6;
 
+// It seems bitwarden is planning to support different types on KDFs
+export const KDF_PBKDF2 = 0;
+export const KDF_PBKDF2_ITERATIONS_DEFAULT = 5000;
+export const KDF_PBKDF2_ITERATIONS_MIN = 5000;
+export const KDF_PBKDF2_ITERATIONS_MAX = 1000000;
+
 /**
  * Bitwarden format of storing ciphers
  */
@@ -40,16 +46,30 @@ export class CipherString {
   }
 }
 
-export async function makeKeyAsync(password, salt) {
+export async function makeKeyAsync(
+  password,
+  salt,
+  kdf = KDF_PBKDF2,
+  iterations = KDF_PBKDF2_ITERATIONS_DEFAULT,
+) {
   return new Promise((resolve, reject) => {
-    crypto.pbkdf2(password, salt, 5000, 256 / 8, 'sha256', (err, derivedKey) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+    switch (kdf) {
+      case KDF_PBKDF2:
+        if (iterations < KDF_PBKDF2_ITERATIONS_MIN || iterations > KDF_PBKDF2_ITERATIONS_MAX) {
+          throw new Error('PBKDF2 iteration count must be between ' + KDF_PBKDF2_ITERATIONS_MIN + ' and ' + KDF_PBKDF2_ITERATIONS_MAX);
+        }
+        crypto.pbkdf2(password, salt, iterations, 256 / 8, 'sha256', (err, derivedKey) => {
+          if (err) {
+            reject(err);
+            return;
+          }
 
-      resolve(derivedKey);
-    });
+          resolve(derivedKey);
+        });
+        break;
+      default:
+        throw new Error('Unknown KDF type: ' + kdf);
+    }
   });
 }
 
@@ -71,10 +91,16 @@ export function makeEncryptionKey(key) {
   ).toString();
 }
 
-export async function hashPasswordAsync(password, salt) {
-  const key = await makeKeyAsync(password, salt);
+export async function hashPasswordAsync(
+  password,
+  salt,
+  kdf = KDF_PBKDF2,
+  iterations = KDF_PBKDF2_ITERATIONS_DEFAULT,
+) {
+  const key = await makeKeyAsync(password, salt, kdf, iterations);
 
   return new Promise((resolve, reject) => {
+    // Only 1 interation, since stretching has been applied in makeKey
     crypto.pbkdf2(key, password, 1, 256 / 8, 'sha256', (err, derivedKey) => {
       if (err) {
         reject(err);
