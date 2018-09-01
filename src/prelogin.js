@@ -13,7 +13,7 @@ export const handler = async (event, context, callback) => {
   const body = utils.normalizeBody(JSON.parse(event.body));
 
   const [user] = (await User.scan()
-    .where('email').equals(body.username.toLowerCase())
+    .where('email').equals(body.email.toLowerCase())
     .execAsync())
     .Items;
 

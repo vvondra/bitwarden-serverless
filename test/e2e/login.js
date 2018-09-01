@@ -8,6 +8,7 @@ describe("Login API", function () {
     return {
       "name": null,
       "email": "pepa" + _.random(1000000) + "@pepa.cz",
+      "kdfIterations": 20000,
       "masterPasswordHash": "r5CFRR+n9NQI8a525FY+0BPR0HGOjVJX0cR1KEMnIOo=",
       "masterPasswordHint": "hintik",
       "key": "0.Fsqd0L8lgo755p8k5fPuJA==|2HtEmPCtc55xsGvUgqhVzRKYTG9sr0V8Gtxa8nTxkGtGGXGLYU27S78DO0BAidhCAf1lqwdSaX/NhpfHKRZDKax22aFYmDvvfo9xqS+KEG8="
@@ -123,6 +124,30 @@ describe("Login API", function () {
       );
 
       return expect(response).to.have.status(400);
+    });
+  });
+
+  it("should return prelogin info for existing account", function () {
+    var registrationBody = getRegistrationBody();
+    var preloginBody = {
+      email: registrationBody.email
+    };
+
+    return chakram.post(
+      process.env.API_URL + "/api/accounts/register",
+      registrationBody
+    ).then(function (response) {
+      return chakram.post(
+        process.env.API_URL + "/api/accounts/prelogin",
+        preloginBody
+      );
+    }).then(function(response) {
+      var body = response.body;
+      expect(response).to.have.status(200);
+      expect(body.Kdf).to.equal(0);
+      expect(body.KdfIterations).to.equal(registrationBody.kdfIterations);
+
+      return chakram.wait();
     });
   });
 
