@@ -1,6 +1,11 @@
 service:
   name: bitwarden-serverless
-
+  # When using the `prod` environment the DynamoDB tables will not be
+  # delete when removing the Cloudformation stack. It's better to risk
+  # having a forgotten table running than losing data
+  tableDeletionPolicy:
+    prod: Retain
+    other: Delete
 plugins:
   - serverless-webpack
 
@@ -11,10 +16,10 @@ provider:
   memorySize: 256
   timeout: 10
   environment:
-    DEVICES_TABLE: ${self:service}-${opt:stage, self:provider.stage}-devices
-    USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
-    CIPHERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-ciphers
-    FOLDERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-folders
+    DEVICES_TABLE: ${self:service}-${self:provider.stage}-devices
+    USERS_TABLE: ${self:service}-${self:provider.stage}-users
+    CIPHERS_TABLE: ${self:service}-${self:provider.stage}-ciphers
+    FOLDERS_TABLE: ${self:service}-${self:provider.stage}-folders
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -158,10 +163,13 @@ functions:
           <<: *default_cors
           path: /{fallback+}
 
+
+
 resources:
   Resources:
     UsersTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:service.tableDeletionPolicy.${self:provider.stage}, self:service.tableDeletionPolicy.other}
       Properties:
         TableName: ${self:provider.environment.USERS_TABLE}
         AttributeDefinitions:
@@ -177,6 +185,7 @@ resources:
           PointInTimeRecoveryEnabled: true
     DevicesTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:service.tableDeletionPolicy.${self:provider.stage}, self:service.tableDeletionPolicy.other}
       Properties:
         TableName: ${self:provider.environment.DEVICES_TABLE}
         AttributeDefinitions:
@@ -192,6 +201,7 @@ resources:
           PointInTimeRecoveryEnabled: true
     CiphersTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:service.tableDeletionPolicy.${self:provider.stage}, self:service.tableDeletionPolicy.other}
       Properties:
         TableName: ${self:provider.environment.CIPHERS_TABLE}
         AttributeDefinitions:
@@ -211,6 +221,7 @@ resources:
           PointInTimeRecoveryEnabled: true
     FoldersTable:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:service.tableDeletionPolicy.${self:provider.stage}, self:service.tableDeletionPolicy.other}
       Properties:
         TableName: ${self:provider.environment.FOLDERS_TABLE}
         AttributeDefinitions:
