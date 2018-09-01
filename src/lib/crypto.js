@@ -91,8 +91,13 @@ export function makeEncryptionKey(key) {
   ).toString();
 }
 
-export async function hashPasswordAsync(password, salt) {
-  const key = await makeKeyAsync(password, salt);
+export async function hashPasswordAsync(
+  password,
+  salt,
+  kdf = KDF_PBKDF2,
+  iterations = KDF_PBKDF2_ITERATIONS_DEFAULT,
+) {
+  const key = await makeKeyAsync(password, salt, kdf, iterations);
 
   return new Promise((resolve, reject) => {
     // Only 1 interation, since stretching has been applied in makeKey

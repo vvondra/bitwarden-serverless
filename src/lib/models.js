@@ -12,7 +12,7 @@ dynogels.log = console;
 // The migration script runs updates on the models depending on each row's version
 // This is the latest version available for each model, new entries have this version
 export const CIPHER_MODEL_VERSION = 1;
-export const USER_MODEL_VERSION = 1;
+export const USER_MODEL_VERSION = 2;
 
 export const Device = dynogels.define('Device', {
   hashKey: 'uuid',
@@ -50,6 +50,7 @@ export const User = dynogels.define('User', {
     totpSecretTemp: Joi.string().allow(null),
     securityStamp: dynogels.types.uuid(),
     culture: Joi.string(),
+    kdfIterations: Joi.number().min(5000).max(1e6),
     version: Joi.number().allow(null),
   },
 });

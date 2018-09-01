@@ -25,8 +25,13 @@ export const migrateHandler = async (event, context, callback) => {
     const version = user.get('version');
     console.log('Checking user ' + user.get('uuid') + ' with version ' + version);
     switch (version) {
-      case 1:
+      case 2:
         console.log('Already up-to-date');
+        break;
+      case 1:
+        userCount += 1;
+        user.set({ kdfIterations: 5000, version: 2 });
+        await user.updateAsync();
         break;
       default:
         userCount += 1;
