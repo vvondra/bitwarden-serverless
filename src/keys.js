@@ -43,29 +43,25 @@ export const handler = async (event, context, callback) => {
   await user.updateAsync();
 
   try {
-    callback(null, {
-      statusCode: 200,
-      headers: utils.CORS_HEADERS,
-      body: JSON.stringify({
-        access_token: tokens.accessToken,
-        expires_in: DEFAULT_VALIDITY,
-        token_type: 'Bearer',
-        refresh_token: tokens.refreshToken,
-        Key: user.get('key'),
-        Id: user.get('uuid'),
-        Name: user.get('name'),
-        Email: user.get('email'),
-        EmailVerified: user.get('emailVerified'),
-        Premium: user.get('premium'),
-        MasterPasswordHint: user.get('passwordHint'),
-        Culture: user.get('culture'),
-        TwoFactorEnabled: user.get('totpSecret'),
-        PrivateKey: user.get('privateKey'),
-        SecurityStamp: user.get('securityStamp'),
-        Organizations: '[]',
-        Object: 'profile',
-      }),
-    });
+    callback(null, utils.okResponse({
+      access_token: tokens.accessToken,
+      expires_in: DEFAULT_VALIDITY,
+      token_type: 'Bearer',
+      refresh_token: tokens.refreshToken,
+      Key: user.get('key'),
+      Id: user.get('uuid'),
+      Name: user.get('name'),
+      Email: user.get('email'),
+      EmailVerified: user.get('emailVerified'),
+      Premium: user.get('premium'),
+      MasterPasswordHint: user.get('passwordHint'),
+      Culture: user.get('culture'),
+      TwoFactorEnabled: user.get('totpSecret'),
+      PrivateKey: user.get('privateKey'),
+      SecurityStamp: user.get('securityStamp'),
+      Organizations: '[]',
+      Object: 'profile',
+    }));
   } catch (e) {
     callback(null, utils.serverError('Internal error', e));
   }

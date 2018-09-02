@@ -37,9 +37,5 @@ export const handler = async (event, context, callback) => {
     Object: 'sync',
   };
 
-  callback(null, {
-    statusCode: 200,
-    headers: utils.CORS_HEADERS,
-    body: JSON.stringify(response),
-  });
+  callback(null, utils.okResponse(response));
 };

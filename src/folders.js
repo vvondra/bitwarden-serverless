@@ -33,10 +33,7 @@ export const postHandler = async (event, context, callback) => {
     });
     await touch(user);
 
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify(mapFolder(folder)),
-    });
+    callback(null, utils.okResponse(mapFolder(folder)));
   } catch (e) {
     callback(null, utils.serverError('Server error saving folder', e));
   }
@@ -82,10 +79,7 @@ export const putHandler = async (event, context, callback) => {
 
     folder = await folder.updateAsync();
 
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify(mapFolder(folder)),
-    });
+    callback(null, utils.okResponse(mapFolder(folder)));
   } catch (e) {
     callback(null, utils.serverError('Server error saving folder', e));
   }
@@ -110,10 +104,7 @@ export const deleteHandler = async (event, context, callback) => {
     await Folder.destroyAsync(user.get('uuid'), folderUuid);
     await touch(user);
 
-    callback(null, {
-      statusCode: 200,
-      body: '',
-    });
+    callback(null, utils.okResponse(''));
   } catch (e) {
     callback(null, utils.validationError(e.toString()));
   }

@@ -22,12 +22,8 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  callback(null, {
-    statusCode: 200,
-    headers: utils.CORS_HEADERS,
-    body: JSON.stringify({
-      Kdf: KDF_PBKDF2,
-      KdfIterations: user.get('kdfIterations') || KDF_PBKDF2_ITERATIONS_DEFAULT,
-    }),
-  });
+  callback(null, utils.okResponse({
+    Kdf: KDF_PBKDF2,
+    KdfIterations: user.get('kdfIterations') || KDF_PBKDF2_ITERATIONS_DEFAULT,
+  }));
 };
