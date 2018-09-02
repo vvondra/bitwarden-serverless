@@ -27,11 +27,14 @@ describe("Accounts API", function () {
     };
   }
 
+  let bearerToken;
+  let email;
 
-  it("should return tokens if authentication successful", function () {
+  before(async function() {
     var registrationBody = getRegistrationBody();
     var loginBody = getLoginBody();
     loginBody.username = registrationBody.email;
+    email = registrationBody.email;
 
     return chakram.post(
       process.env.API_URL + "/api/accounts/register",
@@ -44,17 +47,52 @@ describe("Accounts API", function () {
           form: loginBody
         }
       );
+    }).then(function (response) {
+      bearerToken = response.body.access_token;
+    });
+  })
 
-      return
-    }).then(function (response) {
-      return chakram.get(
-        process.env.API_URL + "/api/accounts/revision-date",
-        { headers: { Authorization: 'Bearer ' + response.body.access_token } }
-      );
-    }).then(function (response) {
+  it("should return account revision date", function () {
+    return chakram.get(
+      process.env.API_URL + "/api/accounts/revision-date",
+      { headers: { Authorization: 'Bearer ' + bearerToken } }
+    ).then(function (response) {
       var body = response.body;
       expect(response).to.have.status(200);
       expect(response.body).to.be.at.least((new Date()).getTime() - (20 * 1000));
+
+      return chakram.wait();
+    });
+  });
+
+  it("should return user profile", function () {
+    return chakram.get(
+      process.env.API_URL + "/api/accounts/profile",
+      { headers: { Authorization: 'Bearer ' + bearerToken } }
+    ).then(function (response) {
+      var body = response.body;
+      expect(response).to.have.status(200);
+      expect(response.body.Email).to.equal(email);
+
+      return chakram.wait();
+    });
+  });
+
+  it("should return update user profile", function () {
+    return chakram.put(
+      process.env.API_URL + "/api/accounts/profile",
+      {
+        name: 'newname',
+        culture: 'cs-CZ',
+        masterPasswordHint: 'newhint',
+      },
+      { headers: { Authorization: 'Bearer ' + bearerToken } }
+    ).then(function (response) {
+      var body = response.body;
+      expect(response).to.have.status(200);
+      expect(body.Name).to.equal('newname');
+      expect(body.Culture).to.equal('cs-CZ');
+      expect(body.MasterPasswordHint).to.equal('newhint');
 
       return chakram.wait();
     });

@@ -49,13 +49,8 @@ default_cors: &default_cors
     allowMethods: "GET, POST, OPTIONS, PUT, DELETE"
 
 functions:
-  prelogin:
-    handler: src/prelogin.handler
-    events:
-      - http:
-          method: post
-          <<: *default_cors
-          path: api/accounts/prelogin
+  # Identity endpoints
+
   login:
     handler: src/login.handler
     events:
@@ -63,6 +58,30 @@ functions:
           method: post
           <<: *default_cors
           path: identity/connect/token
+
+  # Accounts endpoints
+
+  prelogin:
+    handler: src/prelogin.handler
+    events:
+      - http:
+          method: post
+          <<: *default_cors
+          path: api/accounts/prelogin
+  profile:
+    handler: src/accounts.profileHandler
+    events:
+      - http:
+          method: get
+          <<: *default_cors
+          path: api/accounts/profile
+  profile_put:
+    handler: src/accounts.putProfileHandler
+    events:
+      - http:
+          method: put
+          <<: *default_cors
+          path: api/accounts/profile
   keys:
     handler: src/keys.handler
     events:
@@ -84,6 +103,9 @@ functions:
           method: get
           <<: *default_cors
           path: api/accounts/revision-date
+
+  # Other endpoints, ciphers and data
+
   sync:
     handler: src/sync.handler
     events:

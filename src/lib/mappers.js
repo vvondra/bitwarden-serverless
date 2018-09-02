@@ -23,7 +23,7 @@ export function mapCipher(cipher) {
 export function mapUser(user) {
   return {
     Id: user.get('uuid'),
-    Name: null,
+    Name: user.get('name'),
     Email: user.get('email'),
     EmailVerified: user.get('emailVerified'),
     Premium: user.get('premium'),
@@ -31,7 +31,7 @@ export function mapUser(user) {
     Culture: user.get('culture'),
     TwoFactorEnabled: !!user.get('totpSecret'),
     Key: user.get('key'),
-    PrivateKey: null,
+    PrivateKey: (user.get('privateKey') || '').toString('utf8'),
     SecurityStamp: user.get('securityStamp'),
     Organizations: [],
     Object: 'profile',
