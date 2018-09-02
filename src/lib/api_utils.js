@@ -23,6 +23,15 @@ export const CORS_HEADERS = {
   'access-control-allow-headers': 'Content-Type,Authorization,Accept,Device-type,Pragma,Cache-Control',
 };
 
+export function okResponse(body) {
+  console.log('Success response', { body });
+  return {
+    statusCode: 200,
+    headers: CORS_HEADERS,
+    body: typeof body === 'string' ? body : JSON.stringify(body),
+  };
+}
+
 export function validationError(message) {
   console.log('Validation error', { message });
   return {
