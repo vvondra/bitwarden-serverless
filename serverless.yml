@@ -34,6 +34,10 @@ provider:
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CIPHERS_TABLE}"
         - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.FOLDERS_TABLE}"
+  usagePlan:
+    throttle:
+      burstLimit: 300 # request burst
+      rateLimit: 5 # requests per second
 
 default_cors: &default_cors
   cors:
