@@ -1,5 +1,5 @@
 import * as utils from './lib/api_utils';
-import { loadContextFromHeader, touch } from './lib/bitwarden';
+import { loadContextFromHeader } from './lib/bitwarden';
 import { getRevisionDateAsMillis, mapUser } from './lib/mappers';
 
 export const profileHandler = async (event, context, callback) => {
