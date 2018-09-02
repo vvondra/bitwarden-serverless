@@ -149,18 +149,14 @@ export const handler = async (event, context, callback) => {
 
     device = await device.updateAsync();
 
-    callback(null, {
-      statusCode: 200,
-      headers: utils.CORS_HEADERS,
-      body: JSON.stringify({
-        access_token: tokens.accessToken,
-        expires_in: DEFAULT_VALIDITY,
-        token_type: 'Bearer',
-        refresh_token: tokens.refreshToken,
-        Key: user.get('key'),
-        PrivateKey: (user.get('privateKey') || '').toString('utf8'),
-      }),
-    });
+    callback(null, utils.okResponse({
+      access_token: tokens.accessToken,
+      expires_in: DEFAULT_VALIDITY,
+      token_type: 'Bearer',
+      refresh_token: tokens.refreshToken,
+      Key: user.get('key'),
+      PrivateKey: (user.get('privateKey') || '').toString('utf8'),
+    }));
   } catch (e) {
     callback(null, utils.serverError('Internal error', e));
   }

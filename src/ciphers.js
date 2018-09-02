@@ -31,10 +31,7 @@ export const postHandler = async (event, context, callback) => {
 
     await touch(user);
 
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify({ ...mapCipher(cipher), Edit: true }),
-    });
+    callback(null, utils.okResponse({ ...mapCipher(cipher), Edit: true }));
   } catch (e) {
     callback(null, utils.serverError('Server error saving vault item', e));
   }
@@ -80,10 +77,7 @@ export const putHandler = async (event, context, callback) => {
     cipher = await cipher.updateAsync();
     await touch(user);
 
-    callback(null, {
-      statusCode: 200,
-      body: JSON.stringify({ ...mapCipher(cipher), Edit: true }),
-    });
+    callback(null, utils.okResponse({ ...mapCipher(cipher), Edit: true }));
   } catch (e) {
     callback(null, utils.serverError('Server error saving vault item', e));
   }
@@ -108,10 +102,7 @@ export const deleteHandler = async (event, context, callback) => {
     await Cipher.destroyAsync(user.get('uuid'), cipherUuid);
     await touch(user);
 
-    callback(null, {
-      statusCode: 200,
-      body: '',
-    });
+    callback(null, utils.okResponse(''));
   } catch (e) {
     callback(null, utils.validationError(e.toString()));
   }

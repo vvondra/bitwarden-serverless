@@ -32,8 +32,6 @@ export const handler = async (event, context, callback) => {
       .select('COUNT')
       .execAsync();
 
-    console.log(existingUser);
-
     if (existingUser.Count > 0) {
       callback(null, utils.validationError('E-mail already taken'));
       return;
@@ -41,11 +39,7 @@ export const handler = async (event, context, callback) => {
 
     await User.createAsync(buildUserDocument(body));
 
-    callback(null, {
-      statusCode: 200,
-      headers: utils.CORS_HEADERS,
-      body: '',
-    });
+    callback(null, utils.okResponse(''));
   } catch (e) {
     callback(null, utils.serverError(e.message, e));
   }

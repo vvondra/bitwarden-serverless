@@ -1,4 +1,4 @@
-import { normalizeBody, validationError } from './lib/api_utils';
+import { normalizeBody, validationError, okResponse } from './lib/api_utils';
 import { Cipher, Folder } from './lib/models';
 import { loadContextFromHeader, buildCipherDocument, touch } from './lib/bitwarden';
 
@@ -142,8 +142,5 @@ export const postHandler = async (event, context, callback) => {
 
   await touch(user);
 
-  callback(null, {
-    statusCode: 200,
-    body: '',
-  });
+  callback(null, okResponse(''));
 };
