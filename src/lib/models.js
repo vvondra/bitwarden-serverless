@@ -39,7 +39,7 @@ export const User = dynogels.define('User', {
     email: Joi.string().email().required(),
     emailVerified: Joi.boolean(),
     premium: Joi.boolean(),
-    name: Joi.string(),
+    name: Joi.string().allow(null),
     passwordHash: Joi.string().required(),
     passwordHint: Joi.string().allow(null),
     key: Joi.string(),
