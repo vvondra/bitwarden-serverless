@@ -1,3 +1,16 @@
+import prettyBytes from 'pretty-bytes';
+
+function mapAttachment(attachment) {
+  return {
+    Id: attachment.get('id'),
+    Url: 'somes3magic',
+    FileName: attachment.get('filename'),
+    Size: attachment.get('size'),
+    SizeName: prettyBytes(attachment.get('size')),
+    Object: 'attachment',
+  };
+}
+
 export function mapCipher(cipher) {
   return {
     Id: cipher.get('uuid'),
@@ -6,7 +19,7 @@ export function mapCipher(cipher) {
     FolderId: cipher.get('folderUuid'),
     Favorite: cipher.get('favorite'),
     OrganizationId: cipher.get('organizationUuid'),
-    Attachments: cipher.get('attachments'),
+    Attachments: (cipher.get('attachments') || []).map(mapAttachment),
     OrganizationUseTotp: false,
     CollectionIds: [],
     Name: cipher.get('name'),

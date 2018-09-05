@@ -91,6 +91,7 @@ export function buildCipherDocument(body, user) {
     name: body.name,
     notes: body.notes,
     fields: [],
+    attachments: [],
     version: CIPHER_MODEL_VERSION,
   };
 
@@ -142,6 +143,14 @@ export function buildUserDocument(body) {
     premium: true,
     emailVerified: true, // Web-vault requires verified e-mail
     version: USER_MODEL_VERSION,
+  };
+}
+
+export function buildAttachmentDocument(part, url) {
+  return {
+    url,
+    filename: part.filename,
+    size: part.size,
   };
 }
 

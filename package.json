@@ -19,6 +19,7 @@
     "get-stdin": "^5.0.1",
     "mocha": "^4.1.0",
     "mocha-steps": "^1.1.0",
+    "serverless-apigw-binary": "^0.4.4",
     "serverless-webpack": "^3.1.1",
     "webpack": "^3.12.0"
   },
@@ -34,7 +35,9 @@
     "jsonwebtoken": "^8.3.0",
     "lodash": "^4.17.5",
     "object.entries": "^1.0.4",
+    "pretty-bytes": "^5.1.0",
     "qrcode": "^1.2.0",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "uuid": "^3.3.2"
   }
 }
