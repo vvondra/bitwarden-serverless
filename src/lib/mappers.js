@@ -1,17 +1,33 @@
 import prettyBytes from 'pretty-bytes';
+import S3 from 'aws-sdk/clients/s3';
 
-function mapAttachment(attachment) {
+const s3 = new S3();
+
+async function mapAttachment(attachment, cipher) {
+  const params = {
+    Bucket: process.env.ATTACHMENTS_BUCKET,
+    Key: cipher.get('uuid') + '/' + attachment.uuid,
+    Expires: 604800, // 1 week
+  };
+  const url = await new Promise((resolve, reject) =>
+    s3.getSignedUrl('getObject', params, (err, signedUrl) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(signedUrl);
+    }));
   return {
-    Id: attachment.get('uuid'),
-    Url: 'somes3magic',
-    FileName: attachment.get('filename'),
-    Size: attachment.get('size'),
-    SizeName: prettyBytes(attachment.get('size')),
+    Id: attachment.uuid,
+    Url: url,
+    FileName: attachment.filename,
+    Size: attachment.size,
+    SizeName: prettyBytes(attachment.size),
     Object: 'attachment',
   };
 }
 
-export function mapCipher(cipher) {
+export async function mapCipher(cipher) {
   return {
     Id: cipher.get('uuid'),
     Type: cipher.get('type'),
@@ -19,7 +35,8 @@ export function mapCipher(cipher) {
     FolderId: cipher.get('folderUuid'),
     Favorite: cipher.get('favorite'),
     OrganizationId: cipher.get('organizationUuid'),
-    Attachments: cipher.get('attachments').map(mapAttachment),
+    Attachments: await Promise.all(cipher.get('attachments')
+      .map(attachment => mapAttachment(attachment, cipher))),
     OrganizationUseTotp: false,
     CollectionIds: [],
     Name: cipher.get('name'),

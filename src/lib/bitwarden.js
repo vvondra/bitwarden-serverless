@@ -148,7 +148,7 @@ export function buildUserDocument(body) {
 
 export function buildAttachmentDocument(part) {
   return {
-    id: part.id,
+    uuid: part.id,
     filename: part.filename,
     size: part.size,
   };

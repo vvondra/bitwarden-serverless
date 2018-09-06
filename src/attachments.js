@@ -1,4 +1,4 @@
-import s3 from 'aws-sdk/clients/s3';
+import S3 from 'aws-sdk/clients/s3';
 import uuid4 from 'uuid/v4';
 import * as utils from './lib/api_utils';
 import { loadContextFromHeader, touch, buildAttachmentDocument } from './lib/bitwarden';
@@ -50,6 +50,7 @@ export const postHandler = async (event, context, callback) => {
       Key: cipherUuid + '/' + part.id,
     };
 
+    const s3 = new S3();
     await new Promise((resolve, reject) =>
       s3.putObject(params, (err, data) => {
         if (err) {
@@ -64,7 +65,7 @@ export const postHandler = async (event, context, callback) => {
     cipher = await cipher.updateAsync();
     await touch(user);
 
-    callback(null, utils.okResponse(mapCipher(cipher)));
+    callback(null, utils.okResponse(await mapCipher(cipher)));
   } catch (e) {
     callback(null, utils.serverError('Server error saving vault item', e));
   }
@@ -96,6 +97,7 @@ export const deleteHandler = async (event, context, callback) => {
       Key: cipherUuid + '/' + attachmentId,
     };
 
+    const s3 = new S3();
     await new Promise((resolve, reject) =>
       s3.deleteObject(params, (err, data) => {
         if (err) {
@@ -106,7 +108,7 @@ export const deleteHandler = async (event, context, callback) => {
       }));
 
     cipher.set({
-      attachments: cipher.get('attachments').filter(a => a.id !== attachmentId),
+      attachments: cipher.get('attachments').filter(a => a.uuid !== attachmentId),
     });
 
     cipher = await cipher.updateAsync();

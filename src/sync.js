@@ -27,7 +27,7 @@ export const handler = async (event, context, callback) => {
   const response = {
     Profile: mapUser(user),
     Folders: folders.map(mapFolder),
-    Ciphers: ciphers.map(mapCipher),
+    Ciphers: await Promise.all(ciphers.map(mapCipher)),
     Collections: [],
     Domains: {
       EquivalentDomains: null,

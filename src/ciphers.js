@@ -31,7 +31,7 @@ export const postHandler = async (event, context, callback) => {
 
     await touch(user);
 
-    callback(null, utils.okResponse({ ...mapCipher(cipher), Edit: true }));
+    callback(null, utils.okResponse({ ...await mapCipher(cipher), Edit: true }));
   } catch (e) {
     callback(null, utils.serverError('Server error saving vault item', e));
   }
@@ -77,7 +77,7 @@ export const putHandler = async (event, context, callback) => {
     cipher = await cipher.updateAsync();
     await touch(user);
 
-    callback(null, utils.okResponse({ ...mapCipher(cipher), Edit: true }));
+    callback(null, utils.okResponse({ ...await mapCipher(cipher), Edit: true }));
   } catch (e) {
     callback(null, utils.serverError('Server error saving vault item', e));
   }
