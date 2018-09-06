@@ -2,7 +2,7 @@ import prettyBytes from 'pretty-bytes';
 
 function mapAttachment(attachment) {
   return {
-    Id: attachment.get('id'),
+    Id: attachment.get('uuid'),
     Url: 'somes3magic',
     FileName: attachment.get('filename'),
     Size: attachment.get('size'),
@@ -19,7 +19,7 @@ export function mapCipher(cipher) {
     FolderId: cipher.get('folderUuid'),
     Favorite: cipher.get('favorite'),
     OrganizationId: cipher.get('organizationUuid'),
-    Attachments: (cipher.get('attachments') || []).map(mapAttachment),
+    Attachments: cipher.get('attachments').map(mapAttachment),
     OrganizationUseTotp: false,
     CollectionIds: [],
     Name: cipher.get('name'),

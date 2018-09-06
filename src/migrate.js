@@ -46,10 +46,20 @@ export const migrateHandler = async (event, context, callback) => {
     const version = cipher.get('version');
     console.log('Checking cipher ' + cipher.get('uuid') + ' with version ' + version);
     switch (version) {
-      case 1:
+      case 2:
         // up-to-date
         console.log('Already up-to-date');
         break;
+      case 1: {
+        cipherCount += 1;
+        const fields = {
+          version: 2,
+          attachments: [],
+        };
+        cipher.set(fields);
+        await cipher.updateAsync();
+        break;
+      }
       default: {
         cipherCount += 1;
         const fields = {

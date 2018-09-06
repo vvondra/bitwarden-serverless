@@ -1,7 +1,7 @@
 import s3 from 'aws-sdk/clients/s3';
 import uuid4 from 'uuid/v4';
 import * as utils from './lib/api_utils';
-import { loadContextFromHeader, buildCipherDocument, touch } from './lib/bitwarden';
+import { loadContextFromHeader, touch, buildAttachmentDocument } from './lib/bitwarden';
 import { mapCipher } from './lib/mappers';
 import { Cipher } from './lib/models';
 import { parseMultipart } from './lib/multipart';
@@ -57,8 +57,9 @@ export const postHandler = async (event, context, callback) => {
           return;
         }
         resolve(data);
-      })
-    );
+      }));
+
+    cipher.get('attachments').push(buildAttachmentDocument(part));
 
     cipher = await cipher.updateAsync();
     await touch(user);
@@ -72,13 +73,6 @@ export const postHandler = async (event, context, callback) => {
 export const deleteHandler = async (event, context, callback) => {
   console.log('Attachment create handler triggered', JSON.stringify(event, null, 2));
 
-  if (!event.body) {
-    callback(null, utils.validationError('Request body is missing'));
-    return;
-  }
-
-  const body = utils.normalizeBody(JSON.parse(event.body));
-
   let user;
   try {
     ({ user } = await loadContextFromHeader(event.headers.Authorization));
@@ -86,6 +80,40 @@ export const deleteHandler = async (event, context, callback) => {
     callback(null, utils.validationError('User not found: ' + e.message));
     return;
   }
+  const cipherUuid = event.pathParameters.uuid;
+  const { attachmentId } = event.pathParameters;
 
-  callback(null, utils.okResponse(''));
+  try {
+    let cipher = await Cipher.getAsync(user.get('uuid'), cipherUuid);
+
+    if (!cipher) {
+      callback(null, utils.validationError('Unknown vault item'));
+      return;
+    }
+
+    const params = {
+      Bucket: process.env.ATTACHMENTS_BUCKET,
+      Key: cipherUuid + '/' + attachmentId,
+    };
+
+    await new Promise((resolve, reject) =>
+      s3.deleteObject(params, (err, data) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(data);
+      }));
+
+    cipher.set({
+      attachments: cipher.get('attachments').filter(a => a.id !== attachmentId),
+    });
+
+    cipher = await cipher.updateAsync();
+    await touch(user);
+
+    callback(null, utils.okResponse(''));
+  } catch (e) {
+    callback(null, utils.serverError('Server error deleting vault attachment', e));
+  }
 };

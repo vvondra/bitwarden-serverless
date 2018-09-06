@@ -146,9 +146,9 @@ export function buildUserDocument(body) {
   };
 }
 
-export function buildAttachmentDocument(part, url) {
+export function buildAttachmentDocument(part) {
   return {
-    url,
+    id: part.id,
     filename: part.filename,
     size: part.size,
   };

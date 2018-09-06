@@ -11,7 +11,7 @@ dynogels.log = console;
 
 // The migration script runs updates on the models depending on each row's version
 // This is the latest version available for each model, new entries have this version
-export const CIPHER_MODEL_VERSION = 1;
+export const CIPHER_MODEL_VERSION = 2;
 export const USER_MODEL_VERSION = 2;
 
 export const Device = dynogels.define('Device', {
@@ -71,11 +71,10 @@ export const Cipher = dynogels.define('Cipher', {
     data: Joi.object().allow(null),
     favorite: Joi.boolean(),
     attachments: Joi.array().items(Joi.object({
-      id: Joi.string().required(),
-      url: Joi.string().required(),
+      uuid: Joi.string().required(),
       filename: Joi.string().required(),
       size: Joi.number().required(),
-    })).allow(null),
+    })),
     name: Joi.string().allow(null),
     notes: Joi.string().allow(null),
     fields: Joi.any().allow(null),
