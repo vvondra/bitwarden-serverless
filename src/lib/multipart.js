@@ -45,7 +45,7 @@ const defaultResult = { files: {}, fields: {} };
  */
 const split = (str, delim) => [
   str.substring(0, str.indexOf(delim)),
-  str.substring(str.indexOf(delim) + delim.length)
+  str.substring(str.indexOf(delim) + delim.length),
 ];
 
 export const parseMultipart = (event) => {
