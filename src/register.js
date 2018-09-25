@@ -21,7 +21,7 @@ export const handler = async (event, context, callback) => {
     return;
   }
 
-  if (!/^0\..+\|.+/.test(body.key)) {
+  if (!/^\d\..+\|.+/.test(body.key)) {
     callback(null, utils.validationError('supply a valid key'));
     return;
   }
