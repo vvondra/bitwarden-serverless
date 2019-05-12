@@ -148,7 +148,7 @@ export const handler = async (event, context, callback) => {
     device.set({ refreshToken: tokens.refreshToken });
 
     device = await device.updateAsync();
-    var privateKey = user.get('privateKey') || null;
+    const privateKey = user.get('privateKey') || null;
 
     callback(null, utils.okResponse({
       access_token: tokens.accessToken,
