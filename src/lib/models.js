@@ -1,5 +1,5 @@
 import dynogels from 'dynogels-promisified';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 const devicesTableName = process.env.DEVICES_TABLE;
 const usersTableName = process.env.USERS_TABLE;
