@@ -70,7 +70,7 @@ export const Cipher = dynogels.define('Cipher', {
     version: Joi.number().allow(null),
     data: Joi.object().allow(null),
     favorite: Joi.boolean(),
-    attachments: Joi.binary(),
+    attachments: Joi.any().allow(null),
     name: Joi.string().allow(null),
     notes: Joi.string().allow(null),
     fields: Joi.any().allow(null),
