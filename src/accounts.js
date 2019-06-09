@@ -1,6 +1,7 @@
 import * as utils from './lib/api_utils';
 import { loadContextFromHeader } from './lib/bitwarden';
 import { getRevisionDateAsMillis, mapUser } from './lib/mappers';
+import { Device } from './lib/models';
 
 export const profileHandler = async (event, context, callback) => {
   console.log('Account profile handler triggered', JSON.stringify(event, null, 2));
@@ -75,7 +76,11 @@ export const pushTokenHandler = async (event, context, callback) => {
   let device;
   try {
     await loadContextFromHeader(event.headers.Authorization);
-    device = await Device.getAsync(deviceUuid);
+    device = await Device.getAsync(event.pathParameters.uuid);
+
+    if (!device) {
+      throw new Error('Device not found');
+    }
   } catch (e) {
     callback(null, utils.validationError('User not found: ' + e.message));
   }
