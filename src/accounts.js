@@ -72,7 +72,7 @@ export const revisionDateHandler = async (event, context, callback) => {
 export const pushTokenHandler = async (event, context, callback) => {
   console.log('Push token handler triggered', JSON.stringify(event, null, 2));
 
-  let user;
+  let device;
   try {
     ({ device } = await loadContextFromHeader(event.headers.Authorization));
   } catch (e) {
@@ -90,7 +90,7 @@ export const pushTokenHandler = async (event, context, callback) => {
       statusCode: 204,
       headers: Object.assign(utils.CORS_HEADERS, {
         'Content-Type': 'text/plain',
-      })
+      }),
     });
   } catch (e) {
     callback(null, utils.serverError(e.toString()));
