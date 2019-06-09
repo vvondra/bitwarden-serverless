@@ -74,7 +74,8 @@ export const pushTokenHandler = async (event, context, callback) => {
 
   let device;
   try {
-    ({ device } = await loadContextFromHeader(event.headers.Authorization));
+    await loadContextFromHeader(event.headers.Authorization);
+    device = await Device.getAsync(deviceUuid);
   } catch (e) {
     callback(null, utils.validationError('User not found: ' + e.message));
   }
