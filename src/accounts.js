@@ -68,3 +68,31 @@ export const revisionDateHandler = async (event, context, callback) => {
     callback(null, utils.serverError(e.toString()));
   }
 };
+
+export const pushTokenHandler = async (event, context, callback) => {
+  console.log('Push token handler triggered', JSON.stringify(event, null, 2));
+
+  let user;
+  try {
+    ({ device } = await loadContextFromHeader(event.headers.Authorization));
+  } catch (e) {
+    callback(null, utils.validationError('User not found: ' + e.message));
+  }
+
+  const body = utils.normalizeBody(JSON.parse(event.body));
+
+  try {
+    device.set({ pushToken: body.pushtoken });
+
+    device = await device.updateAsync();
+
+    callback(null, {
+      statusCode: 204,
+      headers: Object.assign(utils.CORS_HEADERS, {
+        'Content-Type': 'text/plain',
+      })
+    });
+  } catch (e) {
+    callback(null, utils.serverError(e.toString()));
+  }
+};
