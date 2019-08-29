@@ -105,5 +105,6 @@ export const Attachment = dynogels.define('Attachment', {
     uuid: dynogels.types.uuid(), // Auto-generated
     filename: Joi.string().required(),
     size: Joi.number().required(),
+    key: Joi.string(),
   },
 });

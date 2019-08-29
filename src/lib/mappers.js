@@ -22,6 +22,7 @@ async function mapAttachment(attachment, cipher) {
     Id: attachment.get('uuid'),
     Url: url,
     FileName: attachment.get('filename'),
+    Key: attachment.get('key'),
     Size: attachment.get('size'),
     SizeName: prettyBytes(attachment.get('size')),
     Object: 'attachment',

@@ -60,7 +60,7 @@ export const postHandler = async (event, context, callback) => {
         resolve(data);
       }));
 
-    await Attachment.createAsync(buildAttachmentDocument(part, cipher));
+    await Attachment.createAsync(buildAttachmentDocument(part, attachmentKey, cipher));
     await touch(user);
     await touch(cipher);
 
