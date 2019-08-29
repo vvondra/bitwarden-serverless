@@ -144,7 +144,7 @@ export function buildUserDocument(body) {
     premium: true,
     emailVerified: true, // Web-vault requires verified e-mail
     version: USER_MODEL_VERSION,
-  }
+  };
   if (body.keys) {
     user.privateKey = body.keys.encryptedPrivateKey;
     user.publicKey = body.keys.publicKey;
