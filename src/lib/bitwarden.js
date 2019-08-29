@@ -147,11 +147,12 @@ export function buildUserDocument(body) {
   };
 }
 
-export function buildAttachmentDocument(part) {
+export function buildAttachmentDocument(attachment, cipher) {
   return {
-    uuid: part.id,
-    filename: part.filename,
-    size: part.size,
+    cipherUuid: cipher.get('uuid'),
+    uuid: attachment.id,
+    filename: attachment.filename,
+    size: attachment.size,
   };
 }
 

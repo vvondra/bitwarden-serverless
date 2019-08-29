@@ -7,7 +7,7 @@ const s3 = new S3();
 async function mapAttachment(attachment, cipher) {
   const params = {
     Bucket: process.env.ATTACHMENTS_BUCKET,
-    Key: cipher.get('uuid') + '/' + attachment.uuid,
+    Key: cipher.get('uuid') + '/' + attachment.get('uuid'),
     Expires: 604800, // 1 week
   };
   const url = await new Promise((resolve, reject) =>
@@ -19,11 +19,11 @@ async function mapAttachment(attachment, cipher) {
       resolve(signedUrl);
     }));
   return {
-    Id: attachment.uuid,
+    Id: attachment.get('uuid'),
     Url: url,
-    FileName: attachment.filename,
-    Size: attachment.size,
-    SizeName: prettyBytes(attachment.size),
+    FileName: attachment.get('filename'),
+    Size: attachment.get('size'),
+    SizeName: prettyBytes(attachment.get('size')),
     Object: 'attachment',
   };
 }
@@ -37,7 +37,7 @@ export async function mapCipher(cipher) {
     FolderId: cipher.get('folderUuid'),
     Favorite: cipher.get('favorite'),
     OrganizationId: cipher.get('organizationUuid'),
-    Attachments: await Promise.all(cipher.get('attachments')
+    Attachments: await Promise.all(attachments
       .map(attachment => mapAttachment(attachment, cipher))),
     OrganizationUseTotp: false,
     CollectionIds: [],

@@ -62,6 +62,7 @@ export const postHandler = async (event, context, callback) => {
 
     await Attachment.createAsync(buildAttachmentDocument(part, cipher));
     await touch(user);
+    await touch(cipher);
 
     callback(null, utils.okResponse(await mapCipher(cipher)));
   } catch (e) {
@@ -106,6 +107,7 @@ export const deleteHandler = async (event, context, callback) => {
 
     await Attachment.destroyAsync(cipher.get('uuid'), attachmentUuid);
     await touch(user);
+    await touch(cipher);
 
     callback(null, utils.okResponse(''));
   } catch (e) {
