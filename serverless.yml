@@ -22,7 +22,7 @@ provider:
     CIPHERS_TABLE: ${self:service}-${self:provider.stage}-ciphers
     FOLDERS_TABLE: ${self:service}-${self:provider.stage}-folders
     ATTACHMENTS_TABLE: ${self:service}-${self:provider.stage}-attachments
-    ATTACHMENTS_BUCKET: ${self:service}-${self:provider.stage}-attachments
+    ATTACHMENTS_BUCKET: ${self:service}-${self:provider.stage}-storage
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
