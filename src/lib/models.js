@@ -1,5 +1,5 @@
 import dynogels from 'dynogels-promisified';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 const devicesTableName = process.env.DEVICES_TABLE;
 const usersTableName = process.env.USERS_TABLE;
@@ -70,11 +70,7 @@ export const Cipher = dynogels.define('Cipher', {
     version: Joi.number().allow(null),
     data: Joi.object().allow(null),
     favorite: Joi.boolean(),
-    attachments: Joi.array().items(Joi.object({
-      uuid: Joi.string().required(),
-      filename: Joi.string().required(),
-      size: Joi.number().required(),
-    })),
+    attachments: Joi.any().allow(null),
     name: Joi.string().allow(null),
     notes: Joi.string().allow(null),
     fields: Joi.any().allow(null),

@@ -148,6 +148,7 @@ export const handler = async (event, context, callback) => {
     device.set({ refreshToken: tokens.refreshToken });
 
     device = await device.updateAsync();
+    const privateKey = user.get('privateKey') || null;
 
     callback(null, utils.okResponse({
       access_token: tokens.accessToken,
@@ -155,7 +156,7 @@ export const handler = async (event, context, callback) => {
       token_type: 'Bearer',
       refresh_token: tokens.refreshToken,
       Key: user.get('key'),
-      PrivateKey: (user.get('privateKey') || '').toString('utf8'),
+      PrivateKey: privateKey ? privateKey.toString('utf8') : null,
     }));
   } catch (e) {
     callback(null, utils.serverError('Internal error', e));

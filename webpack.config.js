@@ -5,10 +5,11 @@ const slsw = require('serverless-webpack');
 module.exports = {
   entry: slsw.lib.entries,
   target: 'node',
+  mode: 'production',
   module: {
-    loaders: [{
+    rules: [{
       test: /\.js$/,
-      loaders: ['babel-loader'],
+      use: 'babel-loader',
       include: __dirname,
       exclude: /node_modules/,
     }],
