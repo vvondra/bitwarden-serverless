@@ -42,6 +42,7 @@ export const postHandler = async (event, context, callback) => {
     }
 
     const part = multipart.data;
+    const attachmentKey = multipart.key;
     part.id = uuid4();
     const params = {
       ACL: 'public-read',
@@ -51,14 +52,13 @@ export const postHandler = async (event, context, callback) => {
     };
 
     const s3 = new S3();
-    await new Promise((resolve, reject) =>
-      s3.putObject(params, (err, data) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(data);
-      }));
+    await new Promise((resolve, reject) => s3.putObject(params, (err, data) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(data);
+    }));
 
     await Attachment.createAsync(buildAttachmentDocument(part, attachmentKey, cipher));
     await touch(user);
@@ -96,14 +96,13 @@ export const deleteHandler = async (event, context, callback) => {
     };
 
     const s3 = new S3();
-    await new Promise((resolve, reject) =>
-      s3.deleteObject(params, (err, data) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(data);
-      }));
+    await new Promise((resolve, reject) => s3.deleteObject(params, (err, data) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(data);
+    }));
 
     await Attachment.destroyAsync(cipher.get('uuid'), attachmentUuid);
     await touch(user);

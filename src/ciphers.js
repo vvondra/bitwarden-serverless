@@ -111,18 +111,17 @@ export const deleteHandler = async (event, context, callback) => {
       };
 
       const s3 = new S3();
-      await new Promise((resolve, reject) =>
-        s3.deleteObject(params, (err, data) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(data);
-        }));
+      await new Promise((resolve, reject) => s3.deleteObject(params, (err, data) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(data);
+      }));
 
       // Remove it from table attachments
       Attachment.destroyAsync(cipherUuid, attachment.get('uuid'));
-    })
+    });
 
     // Remove cipher from table ciphers
     await Cipher.destroyAsync(user.get('uuid'), cipherUuid);

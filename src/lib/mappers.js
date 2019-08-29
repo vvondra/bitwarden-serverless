@@ -10,14 +10,13 @@ async function mapAttachment(attachment, cipher) {
     Key: cipher.get('uuid') + '/' + attachment.get('uuid'),
     Expires: 604800, // 1 week
   };
-  const url = await new Promise((resolve, reject) =>
-    s3.getSignedUrl('getObject', params, (err, signedUrl) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(signedUrl);
-    }));
+  const url = await new Promise((resolve, reject) => s3.getSignedUrl('getObject', params, (err, signedUrl) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+    resolve(signedUrl);
+  }));
   return {
     Id: attachment.get('uuid'),
     Url: url,

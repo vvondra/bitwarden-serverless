@@ -49,9 +49,7 @@ const split = (str, delim) => [
 ];
 
 export const parseMultipart = (event) => {
-  const boundary =
-    prefixBoundary +
-    getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
+  const boundary = prefixBoundary + getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
   if (!boundary) {
     return defaultResult;
   }
