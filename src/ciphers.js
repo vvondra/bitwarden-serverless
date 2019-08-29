@@ -1,7 +1,8 @@
+import S3 from 'aws-sdk/clients/s3';
 import * as utils from './lib/api_utils';
 import { loadContextFromHeader, buildCipherDocument, touch } from './lib/bitwarden';
 import { mapCipher } from './lib/mappers';
-import { Cipher } from './lib/models';
+import { Cipher, Attachment } from './lib/models';
 
 export const postHandler = async (event, context, callback) => {
   console.log('Cipher create handler triggered', JSON.stringify(event, null, 2));
@@ -98,7 +99,32 @@ export const deleteHandler = async (event, context, callback) => {
     callback(null, utils.validationError('Missing vault item ID'));
   }
 
+  let attachments;
   try {
+    // Remove attachments. First retrieve associated attachments to the cipher.
+    attachments = (await Attachment.query(cipherUuid).execAsync()).Items;
+    attachments.forEach(async (attachment) => {
+      // Remove it from S3 bucket
+      const params = {
+        Bucket: process.env.ATTACHMENTS_BUCKET,
+        Key: cipherUuid + '/' + attachment.get('uuid'),
+      };
+
+      const s3 = new S3();
+      await new Promise((resolve, reject) =>
+        s3.deleteObject(params, (err, data) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(data);
+        }));
+
+      // Remove it from table attachments
+      Attachment.destroyAsync(cipherUuid, attachment.get('uuid'));
+    })
+
+    // Remove cipher from table ciphers
     await Cipher.destroyAsync(user.get('uuid'), cipherUuid);
     await touch(user);
 
