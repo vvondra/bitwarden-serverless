@@ -94,7 +94,7 @@ export const Folder = dynogels.define('Folder', {
   },
 });
 
-export const Attachment = dynogels.define('Attachment',{
+export const Attachment = dynogels.define('Attachment', {
   hashKey: 'cipherUuid',
   rangeKey: 'uuid',
   timestamps: true,
@@ -106,4 +106,4 @@ export const Attachment = dynogels.define('Attachment',{
     filename: Joi.string().required(),
     size: Joi.number().required(),
   },
-})
+});

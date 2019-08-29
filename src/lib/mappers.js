@@ -1,5 +1,6 @@
 import prettyBytes from 'pretty-bytes';
 import S3 from 'aws-sdk/clients/s3';
+import { Attachment } from './models';
 
 const s3 = new S3();
 
@@ -28,6 +29,7 @@ async function mapAttachment(attachment, cipher) {
 }
 
 export async function mapCipher(cipher) {
+  const attachments = (await Attachment.query(cipher.get('uuid')).execAsync()).Items;
   return {
     Id: cipher.get('uuid'),
     Type: cipher.get('type'),

@@ -93,7 +93,6 @@ export function buildCipherDocument(body, user) {
     name: body.name,
     notes: body.notes,
     fields: [],
-    attachments: [],
     version: CIPHER_MODEL_VERSION,
   };
 
