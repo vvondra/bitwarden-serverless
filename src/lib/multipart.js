@@ -1,3 +1,4 @@
+/* eslint-disable prefer-destructuring */
 /**
 
 multipart.js
@@ -49,31 +50,46 @@ const split = (str, delim) => [
 ];
 
 export const parseMultipart = (event) => {
-  const boundary = prefixBoundary + getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
+  const deviceType = getValueIgnoringKeyCase(event.headers, 'Device-Type');
+  let boundary;
+  if (deviceType === '0') { // mobile app
+    boundary = prefixBoundary + getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1].replace(/^"(.*)"$/, '$1');
+  } else {
+    boundary = prefixBoundary + getValueIgnoringKeyCase(event.headers, 'Content-Type').split('=')[1];
+  }
   if (!boundary) {
     return defaultResult;
   }
-  return (event.isBase64Encoded
-    ? Buffer.from(event.body, 'base64').toString('binary')
-    : event.body
-  )
-    .split(boundary)
+  const data = (event.isBase64Encoded === false
+    ? event.body
+    : Buffer.from(event.body, 'base64').toString('binary'));
+  return data.split(boundary)
     .filter(item => item.indexOf('Content-Disposition: form-data') !== -1)
     .map((item) => {
       const tmp = split(item, delimData);
       const header = tmp[0];
       let content = tmp[1];
-      const name = header.match(/name="([^"]+)"/)[1];
+      let name;
+      if (deviceType === '0') { // mobile app
+        name = header.match(/name=(\w+)(;?)/)[1];
+      } else {
+        name = header.match(/name="([^"]+)"/)[1];
+      }
       const result = {};
       result[name] = content;
-
+      let filename;
+      let contentType;
       if (header.indexOf('filename') !== -1) {
-        const filename = header.match(/filename="([^"]+)"/)[1];
-        const contentType = header.match(/Content-Type: (.+)/)[1];
-
-        if (contentType.indexOf('text') === -1) {
-          // replace content with binary
-          content = Buffer.from(content, 'binary');
+        filename = header.match(/filename="([^"]+)"/)[1];
+        contentType = header.match(/Content-Type: (.+)/);
+        if (contentType) {
+          contentType = contentType[1];
+          if (contentType.indexOf('text') === -1) {
+            content = Buffer.from(content, 'binary'); // replace content with binary
+          }
+        } else { // mobile app. It has content disposition in instead of content type
+          contentType = header.match(/Content-Disposition: (\w+-\w+)(;?)/)[1];
+          content = Buffer.from(content, 'binary'); // replace content with binary
         }
         result[name] = {
           filename,
