@@ -8,6 +8,7 @@ service:
     other: Delete
 plugins:
   - serverless-webpack
+  - serverless-offline
 
 provider:
   name: aws
