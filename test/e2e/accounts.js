@@ -102,7 +102,7 @@ describe("Accounts API", function () {
 
   it("should update push token", function () {
     return chakram.put(
-      process.env.API_URL + "api/devices/identifier/" + JSON.parse(Buffer.from(bearerToken.split('.')[1], 'base64').toString('binary')).device + "/token",
+      process.env.API_URL + "/api/devices/identifier/" + JSON.parse(Buffer.from(bearerToken.split('.')[1], 'base64').toString('binary')).device + "/token",
       { pushToken: 'blebleble' },
       { headers: { Authorization: 'Bearer ' + bearerToken } }
     ).then(function (response) {
