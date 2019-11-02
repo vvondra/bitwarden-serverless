@@ -57,13 +57,7 @@ export const revisionDateHandler = async (event, context, callback) => {
   }
 
   try {
-    callback(null, {
-      statusCode: 200,
-      headers: Object.assign(utils.CORS_HEADERS, {
-        'Content-Type': 'text/plain',
-      }),
-      body: getRevisionDateAsMillis(user),
-    });
+    callback(null, utils.okResponse(getRevisionDateAsMillis(user)));
   } catch (e) {
     callback(null, utils.serverError(e.toString()));
   }
