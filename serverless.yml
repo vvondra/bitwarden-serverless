@@ -8,11 +8,12 @@ service:
     other: Delete
 plugins:
   - serverless-webpack
+  - serverless-offline
 
 provider:
   name: aws
   stage: ${opt:stage, 'prod'}
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   memorySize: 256
   timeout: 10
   environment:
