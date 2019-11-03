@@ -133,7 +133,7 @@ export function buildCipherDocument(body, user) {
 }
 
 export function buildUserDocument(body) {
-  return {
+  const user = {
     email: body.email.toLowerCase(),
     passwordHash: body.masterpasswordhash,
     passwordHint: body.masterpasswordhint,
@@ -145,7 +145,13 @@ export function buildUserDocument(body) {
     emailVerified: true, // Web-vault requires verified e-mail
     version: USER_MODEL_VERSION,
   };
+  if (body.keys) {
+    user.privateKey = body.keys.encryptedPrivateKey;
+    user.publicKey = body.keys.publicKey;
+  }
+  return user;
 }
+
 
 export function generateSecret() {
   return crypto.randomBytes(64).toString('hex');
