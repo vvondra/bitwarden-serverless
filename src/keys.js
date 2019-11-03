@@ -10,7 +10,7 @@ export const handler = async (event, context, callback) => {
   }
 
   let body;
-  const contentType = event.headers['Content-Type'].split(';')[0];
+  const contentType = event.headers['content-type'].split(';')[0];
   if (contentType === 'application/json') {
     body = utils.normalizeBody(JSON.parse(event.body));
   } else {

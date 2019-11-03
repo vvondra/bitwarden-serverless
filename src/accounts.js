@@ -1,7 +1,6 @@
 import * as utils from './lib/api_utils';
 import { loadContextFromHeader } from './lib/bitwarden';
 import { getRevisionDateAsMillis, mapUser } from './lib/mappers';
-import { Device } from './lib/models';
 
 export const profileHandler = async (event, context, callback) => {
   console.log('Account profile handler triggered', JSON.stringify(event, null, 2));

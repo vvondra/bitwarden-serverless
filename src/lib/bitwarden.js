@@ -93,7 +93,6 @@ export function buildCipherDocument(body, user) {
     name: body.name,
     notes: body.notes,
     fields: [],
-    attachments: [],
     version: CIPHER_MODEL_VERSION,
   };
 
@@ -148,11 +147,13 @@ export function buildUserDocument(body) {
   };
 }
 
-export function buildAttachmentDocument(part) {
+export function buildAttachmentDocument(attachment, attachmentKey, cipher) {
   return {
-    uuid: part.id,
-    filename: part.filename,
-    size: part.size,
+    cipherUuid: cipher.get('uuid'),
+    uuid: attachment.id,
+    filename: attachment.filename,
+    size: attachment.size,
+    key: attachmentKey,
   };
 }
 
