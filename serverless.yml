@@ -8,12 +8,13 @@ service:
     other: Delete
 plugins:
   - serverless-webpack
+  - serverless-offline
   - serverless-apigw-binary
 
 provider:
   name: aws
   stage: ${opt:stage, 'prod'}
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   memorySize: 256
   timeout: 10
   environment:
@@ -123,6 +124,13 @@ functions:
           method: get
           <<: *default_cors
           path: api/accounts/revision-date
+  device_push_token:
+    handler: src/accounts.pushTokenHandler
+    events:
+      - http:
+          method: put
+          <<: *default_cors
+          path: api/devices/identifier/{uuid}/token
 
   # Other endpoints, ciphers and data
 

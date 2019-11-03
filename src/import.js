@@ -98,11 +98,11 @@ export const postHandler = async (event, context, callback) => {
   /**
    * Cipher creation
    */
-
   if (!Array.isArray(body.ciphers)) {
     callback(null, validationError('Ciphers is not an array'));
     return;
-  } else if (!Array.isArray(body.folderrelationships)) {
+  }
+  if (!Array.isArray(body.folderrelationships)) {
     callback(null, validationError('FolderRelationships is not an array'));
     return;
   }

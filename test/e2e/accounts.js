@@ -3,6 +3,8 @@ var _ = require('lodash');
 var expect = chakram.expect;
 
 describe("Accounts API", function () {
+  const deviceId = "aac2e34a-44db-42ab-a733-5322dd582c3d";
+
   function getRegistrationBody() {
     return {
       "name": null,
@@ -21,7 +23,7 @@ describe("Accounts API", function () {
       "scope": "api offline_access",
       "client_id": "browser",
       "deviceType": 3,
-      "deviceIdentifier": "aac2e34a-44db-42ab-a733-5322dd582c3d",
+      "deviceIdentifier": deviceId,
       "deviceName": "firefox",
       "devicePushToken": ""
     };
@@ -93,6 +95,19 @@ describe("Accounts API", function () {
       expect(body.Name).to.equal('newname');
       expect(body.Culture).to.equal('cs-CZ');
       expect(body.MasterPasswordHint).to.equal('newhint');
+
+      return chakram.wait();
+    });
+  });
+
+  it("should update push token", function () {
+    return chakram.put(
+      process.env.API_URL + "/api/devices/identifier/" + JSON.parse(Buffer.from(bearerToken.split('.')[1], 'base64').toString('binary')).device + "/token",
+      { pushToken: 'blebleble' },
+      { headers: { Authorization: 'Bearer ' + bearerToken } }
+    ).then(function (response) {
+      var body = response.body;
+      expect(response).to.have.status(204);
 
       return chakram.wait();
     });
