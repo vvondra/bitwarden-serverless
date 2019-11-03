@@ -70,24 +70,21 @@ export const parseMultipart = (event) => {
       let content = tmp[1];
       let name;
       if (deviceType === '0') { // mobile app
-        name = header.match(/name=(\w+)(;?)/)[1];
+        [, name] = header.match(/name=(\w+)(;?)/);
       } else {
-        name = header.match(/name="([^"]+)"/)[1];
+        [, name] = header.match(/name="([^"]+)"/);
       }
       const result = {};
       result[name] = content;
-      let filename;
-      let contentType;
       if (header.indexOf('filename') !== -1) {
-        filename = header.match(/filename="([^"]+)"/)[1];
-        contentType = header.match(/Content-Type: (.+)/);
+        const filename = header.match(/filename="([^"]+)"/)[1];
+        let [, contentType] = header.match(/Content-Type: (.+)/);
         if (contentType) {
-          contentType = contentType[1];
           if (contentType.indexOf('text') === -1) {
             content = Buffer.from(content, 'binary'); // replace content with binary
           }
         } else { // mobile app. It has content disposition in instead of content type
-          contentType = header.match(/Content-Disposition: (\w+-\w+)(;?)/)[1];
+          [, contentType] = header.match(/Content-Disposition: (\w+-\w+)(;?)/);
           content = Buffer.from(content, 'binary'); // replace content with binary
         }
         result[name] = {
