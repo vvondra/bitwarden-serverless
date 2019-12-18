@@ -17,13 +17,9 @@ jobs:
       with:
         node-version: 12.x
     - name: install dependencies
-      run: yarn install
-    - name: lint
-      run: yarn lint
+      run: npm install
     - name: test
-      run: yarn test
-    - name: generate
-      run: yarn generate
+      run: npm test
     - name: serverless deploy
       run: npx serverless deploy
       env:
