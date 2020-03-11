@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "AWS Serverless implementation of the Bitwarden API",
   "scripts": {
-    "test": "./test.sh"
+    "test": "./test.sh",
+    "deploy": "serverless deploy --region $REGION --stage prod"
   },
   "devDependencies": {
     "@babel/core": "^7.4.4",
