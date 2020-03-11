@@ -8,6 +8,7 @@ service:
     other: Delete
 plugins:
   - serverless-webpack
+  - serverless-offline
 
 provider:
   name: aws
@@ -109,6 +110,13 @@ functions:
           method: get
           <<: *default_cors
           path: api/accounts/revision-date
+  device_push_token:
+    handler: src/accounts.pushTokenHandler
+    events:
+      - http:
+          method: put
+          <<: *default_cors
+          path: api/devices/identifier/{uuid}/token
 
   # Other endpoints, ciphers and data
 
