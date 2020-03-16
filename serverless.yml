@@ -98,6 +98,8 @@ functions:
           path: api/accounts/keys
   register:
     handler: src/register.handler
+    environment:
+      DISABLE_USER_REGISTRATION: ${env:DISABLE_USER_REGISTRATION, 'false'}
     events:
       - http:
           method: post
