@@ -24,6 +24,8 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
 
 ## Current status
 
+**In mid-2020 I have stopped using this backend for my own personal purposes and the repository is in best-effort maintainenance mode based on reported issues. I'd be more than happy to hand it over to a dedicated maintainer.**
+
 - [x] Tested with Chrome extension
 - [x] Tested with Android app
 - [x] Tested with Desktop app (macOS)
