@@ -183,6 +183,9 @@ describe("Login API", function () {
       expect(decoded.payload.email).to.equal(loginBody.username);
       expect(decoded.payload.nbf).to.be.below((new Date()).getTime() / 1000);
       expect(decoded.payload.exp).to.be.above((new Date()).getTime() / 1000);
+      expect(body.Kdf).to.equal(0);
+      expect(body.KdfIterations).to.equal(registrationBody.kdfIterations);
+      expect(body.ResetMasterPassword).to.equal(false);
 
       return chakram.wait();
     });
@@ -290,6 +293,9 @@ describe("Login API", function () {
         expect(body.refresh_token).to.equal(refreshToken);
         expect(body.access_token).not.to.equal(accessToken);
         expect(body.Key).to.equal(registrationBody.key);
+        expect(body.Kdf).to.equal(0);
+        expect(body.KdfIterations).to.equal(registrationBody.kdfIterations);
+        expect(body.ResetMasterPassword).to.equal(false);
 
         return chakram.wait();
       });
