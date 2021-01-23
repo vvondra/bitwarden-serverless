@@ -7,7 +7,7 @@
 
 ## Description
 
-[![Build Status](https://travis-ci.org/vvondra/bitwarden-serverless.svg?branch=master)](https://travis-ci.org/vvondra/bitwarden-serverless)
+![Integration tests](https://github.com/vvondra/bitwarden-serverless/workflows/Integration%20tests/badge.svg?branch=master)
 
 An alternative implementation of the [Bitwarden API](https://github.com/bitwarden/core) based on a AWS Serverless stack. Inspired by [bitwarden-ruby](https://github.com/jcs/bitwarden-ruby).
 
