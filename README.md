@@ -1,5 +1,12 @@
 # Bitwarden Serverless
 
+
+## Current status
+
+**In mid-2020 I have stopped using this backend for my own personal purposes and the repository is in best-effort maintainenance mode based on reported issues. I'd be more than happy to hand it over to a dedicated maintainer. Contact me at <bitwarden@vojtechvondra.cz> in case of interest or open a GH issue.**
+
+## Description
+
 [![Build Status](https://travis-ci.org/vvondra/bitwarden-serverless.svg?branch=master)](https://travis-ci.org/vvondra/bitwarden-serverless)
 
 An alternative implementation of the [Bitwarden API](https://github.com/bitwarden/core) based on a AWS Serverless stack. Inspired by [bitwarden-ruby](https://github.com/jcs/bitwarden-ruby).
@@ -20,11 +27,6 @@ An alternative implementation of the [Bitwarden API](https://github.com/bitwarde
   * [Motivation](#motivation)
   * [Development](#development)
   * [TODO](#todo)
-
-
-## Current status
-
-**In mid-2020 I have stopped using this backend for my own personal purposes and the repository is in best-effort maintainenance mode based on reported issues. I'd be more than happy to hand it over to a dedicated maintainer.**
 
 - [x] Tested with Chrome extension
 - [x] Tested with Android app
