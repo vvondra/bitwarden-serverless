@@ -3,6 +3,7 @@ import speakeasy from 'speakeasy';
 import * as utils from './lib/api_utils';
 import { User, Device } from './lib/models';
 import { regenerateTokens, hashesMatch, DEFAULT_VALIDITY } from './lib/bitwarden';
+import { KDF_PBKDF2, KDF_PBKDF2_ITERATIONS_DEFAULT } from './lib/crypto';
 
 export const handler = async (event, context, callback) => {
   console.log('Login handler triggered', JSON.stringify(event, null, 2));
@@ -157,6 +158,9 @@ export const handler = async (event, context, callback) => {
       refresh_token: tokens.refreshToken,
       Key: user.get('key'),
       PrivateKey: privateKey ? privateKey.toString('utf8') : null,
+      Kdf: KDF_PBKDF2,
+      KdfIterations: user.get('kdfIterations') || KDF_PBKDF2_ITERATIONS_DEFAULT,
+      ResetMasterPassword: false, // TODO: according to official server https://github.com/bitwarden/server/blob/01d4d97ef18637fa857195a7285fda092124a677/src/Core/IdentityServer/BaseRequestValidator.cs#L164
     }));
   } catch (e) {
     callback(null, utils.serverError('Internal error', e));
